@@ -5,7 +5,7 @@ public static class HexData
 {
     public const float OuterRadius= 0.675f; 
 	public const float InnerRadius = OuterRadius * 0.866025404f; //sqrt(3)/2 = 0.58456714755 roughly
-
+	public const float CellDiameter = InnerRadius * 2f + 0.1f;
 	// 2* 0.58456714755 + x*2*0.58456714755 for exact tile radius.
 }
 

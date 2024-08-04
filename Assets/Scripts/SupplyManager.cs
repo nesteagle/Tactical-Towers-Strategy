@@ -40,11 +40,11 @@ public class SupplyManager : MonoBehaviour
             {
                 yield return new WaitUntil(() => enemy.FollowPath(villageCell.Position.x, villageCell.Position.y) == true);
             }
-            yield return new WaitUntil(() => Vector2.Distance(enemy.transform.position,villageCell.transform.position) <=HexData.InnerRadius*2f+0.1f);
+            yield return new WaitUntil(() => Vector2.Distance(enemy.transform.position,villageCell.transform.position) <=HexData.CellDiameter);
             Debug.Log("there now");
             yield return new WaitForSeconds(2f);
             enemy.FollowPath(baseCell.Position.x, baseCell.Position.y);
-            yield return new WaitUntil(() => Vector2.Distance(enemy.transform.position, baseCell.transform.position) <= HexData.InnerRadius*2f+0.1f);
+            yield return new WaitUntil(() => Vector2.Distance(enemy.transform.position, baseCell.transform.position) <= HexData.CellDiameter);
             Debug.Log("done route");
             yield return new WaitForSeconds(1f);
             if (enemy.OnPlayerTeam == true)
