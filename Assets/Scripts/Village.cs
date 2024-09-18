@@ -6,7 +6,7 @@ public class Village : MonoBehaviour
 {
     public HexCell Cell;
     private SupplyManager _supplyManager;
-    public Game _manager;
+    private Game _manager;
     private List<Enemy> _playerControl = new List<Enemy>();
     private List<Enemy> _enemyControl = new List<Enemy>();
     public float Control;
@@ -20,6 +20,7 @@ public class Village : MonoBehaviour
         GameObject control = GameObject.Find("Control");
         _supplyManager = control.GetComponent<SupplyManager>();
         _manager = control.GetComponent<Game>();
+        _manager.TotalVillages.Add(Cell);
         StartCoroutine(UpdateVillage());
     }
     private void OnTriggerEnter2D(Collider2D collision)
@@ -60,10 +61,17 @@ public class Village : MonoBehaviour
                 Control = -1f;
                 if (_supplyRoutine == null) _supplyRoutine = StartCoroutine(SpawnSupply(_manager.EnemySpawnCell, false));
             }
+            if (-0.5f>Control && 0.5f < Control)
+            {
+                if (_manager.PlayerVillages.Contains(Cell)) _manager.PlayerVillages.Remove(Cell);
+                else if (_manager.EnemyVillages.Contains(Cell))_manager.EnemyVillages.Remove(Cell);
+            }
         }
     }
     private IEnumerator SpawnSupply(HexCell baseCell, bool onPlayerTeam)
     {
+        if (onPlayerTeam) if (!_manager.PlayerVillages.Contains(Cell)) _manager.PlayerVillages.Add(Cell);
+        else if (_manager.EnemyVillages.Contains(Cell)) _manager.EnemyVillages.Add(Cell);
         yield return new WaitForSeconds(2.5f);//can do anim here
         _supplier = _supplyManager.SpawnSupplyUnit(baseCell,onPlayerTeam);
         _supplier.StartCoroutine(_supplyManager.SupplyVillage(_supplier, Cell, baseCell));

@@ -12,9 +12,9 @@ public class TerrainGeneration : MonoBehaviour
     private void Start()
     {
         //CreateTerrain(Map);
-        CreateTroop(0,0,"Knight");
-        CreateTroop(3,-3, "Scout");
-        CreateTroop(-3,-3,"Archer");
+        //CreateTroop(0,0,"Knight");
+        //CreateTroop(3,-3, "Scout");
+        //CreateTroop(-3,-3,"Archer");
     }
     //private void Update()
     //{

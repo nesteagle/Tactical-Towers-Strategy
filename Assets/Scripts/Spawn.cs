@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -13,10 +14,10 @@ public class Spawn : MonoBehaviour
     private bool _menuOpened;
     public bool IsPlayerSpawn;
     private Game _manager;
-    public Queue<string> Actions=new();
+    public Queue<string> Actions = new();
     private int _index;
     private bool _spawning; //make functional eventually
-    private readonly float[] _cooldownTimes=new float[] { 1f, 1.5f, 3f };
+    private readonly float[] _cooldownTimes = new float[] { 1f, 1.5f, 3f };
     private readonly int[] _unitCosts = new int[] { 2, 3, 5 };
     private void Start()
     {
@@ -77,20 +78,28 @@ public class Spawn : MonoBehaviour
                 return 1;
             case "Archer":
                 return 2;
-            default: 
+            default:
                 return -1;
         }
     }
     public void PlaceTroop(string type)
     {
         _index++;
+        if (IsPlayerSpawn)
+        {
+            if (_manager.PlayerCoins < _unitCosts[CheckUnit(type)]) return;
+            _manager.PlayerCoins -= _unitCosts[CheckUnit(type)];
+        }
+        else if (_manager.EnemyCoins < _unitCosts[CheckUnit(type)]) return;
+        _manager.EnemyCoins -= _unitCosts[CheckUnit(type)];
         //if (_cell.Occupied) yield break;
         //if (resources<number) return;
         //all checks will be here.
         //maybe add method to place on adjacent tiles.
 
         string id = type + " " + _index;
-        if (!Actions.Contains(id)){
+        if (!Actions.Contains(id))
+        {
             Actions.Enqueue(id);
             Debug.Log(id);
         }
@@ -101,7 +110,7 @@ public class Spawn : MonoBehaviour
         {
             if (Actions.Count > 0)
             {
-                yield return new WaitUntil(() => _cell.Occupied==false);
+                yield return new WaitUntil(() => _cell.Occupied == false);
                 yield return new WaitForSeconds(_cooldownTimes[CheckUnit(Actions.Peek().Split(" ")[0])]);
                 //play animation[CheckUnit(Actions.Peek().Split(" ")[0])];
                 //play animation (when made)
@@ -115,31 +124,34 @@ public class Spawn : MonoBehaviour
     }
     public void CreateTroop(HexCell cell, string type)
     {
-        GameObject enemyObject;
-        Enemy enemy = null;
+        GameObject troopObject;
+        Enemy troop = null;
         switch (type)
         {
             case "Knight":
-                enemyObject = Instantiate(UnitPrefabs[0]);
-                enemy = enemyObject.GetComponent<Enemy>();
-                Instantiate(RangeDetectorPrefab[0], enemy.transform);
+                troopObject = Instantiate(UnitPrefabs[0]);
+                troop = troopObject.GetComponent<Enemy>();
+                Instantiate(RangeDetectorPrefab[0], troop.transform);
                 break;
             case "Scout":
-                enemyObject = Instantiate(UnitPrefabs[1]);
-                enemy = enemyObject.GetComponent<Enemy>();
-                Instantiate(RangeDetectorPrefab[0], enemy.transform);
+                troopObject = Instantiate(UnitPrefabs[1]);
+                troop = troopObject.GetComponent<Enemy>();
+                Instantiate(RangeDetectorPrefab[0], troop.transform);
                 break;
             case "Archer":
-                enemyObject = Instantiate(UnitPrefabs[2]);
-                enemy = enemyObject.GetComponent<Enemy>();
-                Instantiate(RangeDetectorPrefab[1], enemy.transform);
+                troopObject = Instantiate(UnitPrefabs[2]);
+                troop = troopObject.GetComponent<Enemy>();
+                Instantiate(RangeDetectorPrefab[1], troop.transform);
                 break;
         }
-        enemy.Type = type;
-        enemy.Position = new Vector2Int(cell.Position.x, cell.Position.y);
-        enemy.InitializePosition(enemy.Position);
-        enemy.OnPlayerTeam = IsPlayerSpawn;
-        _manager.Enemies.Add(enemy);
+        troop.Type = type;
+        troop.Position = new Vector2Int(cell.Position.x, cell.Position.y);
+        troop.InitializePosition(troop.Position);
+        troop.OnPlayerTeam = IsPlayerSpawn;
+        _manager.Enemies.Add(troop);
         cell.Occupied = true;
+        if (IsPlayerSpawn) _manager.PlayerEnemies.Add(troop);
+        else _manager.EnemyEnemies.Add(troop);
+
     }
 }
