@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ButtonControl2 : MonoBehaviour
+public class ButtonControl : MonoBehaviour
 {
     public Spawn Deploy;
 
