@@ -19,6 +19,7 @@ public class Enemy : MonoBehaviour
     public float Speed; //speed between tile movement.
     public Vector2Int Position; //closest tile (or make them spawn on said tile)
     public string Type;//useful when extending class
+    public int ID;
     private List<HexCell> _hexPath;
     public bool Moving = false;
     public bool Attacking = false;

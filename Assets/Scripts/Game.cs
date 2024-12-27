@@ -22,6 +22,18 @@ public class Game : MonoBehaviour
         PlayerSpawn = PlayerSpawnCell.GetComponentInChildren<Spawn>();
         EnemySpawn = EnemySpawnCell.GetComponentInChildren<Spawn>();
     }
+    public Enemy GetEnemy(int id)
+    {
+        if (id == -1) return null;
+        foreach (Enemy enemy in Enemies)
+        {
+            if (enemy.ID == id)
+            {
+                return enemy;
+            }
+        }
+        return null;
+    }
 
     // Update is called once per frame
     void Update()

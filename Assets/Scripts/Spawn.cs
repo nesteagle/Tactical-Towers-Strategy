@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
@@ -82,15 +83,15 @@ public class Spawn : MonoBehaviour
                 return -1;
         }
     }
-    public void PlaceTroop(string type)
+    public int PlaceTroop(string type)
     {
         _index++;
         if (IsPlayerSpawn)
         {
-            if (_manager.PlayerCoins < _unitCosts[CheckUnit(type)]) return;
+            if (_manager.PlayerCoins < _unitCosts[CheckUnit(type)]) return -1;
             _manager.PlayerCoins -= _unitCosts[CheckUnit(type)];
         }
-        else if (_manager.EnemyCoins < _unitCosts[CheckUnit(type)]) return;
+        else if (_manager.EnemyCoins < _unitCosts[CheckUnit(type)]) return -1;
         _manager.EnemyCoins -= _unitCosts[CheckUnit(type)];
         //if (_cell.Occupied) yield break;
         //if (resources<number) return;
@@ -98,11 +99,8 @@ public class Spawn : MonoBehaviour
         //maybe add method to place on adjacent tiles.
 
         string id = type + " " + _index;
-        if (!Actions.Contains(id))
-        {
-            Actions.Enqueue(id);
-            Debug.Log(id);
-        }
+        Actions.Enqueue(id); 
+        return _index;
     }
     private IEnumerator ManageActions()
     {
@@ -110,11 +108,12 @@ public class Spawn : MonoBehaviour
         {
             if (Actions.Count > 0)
             {
+                string[] splitData = Actions.Peek().Split(" ");
                 yield return new WaitUntil(() => _cell.Occupied == false);
-                yield return new WaitForSeconds(_cooldownTimes[CheckUnit(Actions.Peek().Split(" ")[0])]);
+                yield return new WaitForSeconds(_cooldownTimes[CheckUnit(splitData[0])]);
                 //play animation[CheckUnit(Actions.Peek().Split(" ")[0])];
                 //play animation (when made)
-                CreateTroop(_cell, Actions.Peek().Split(" ")[0]);
+                CreateTroop(_cell, splitData[0], int.Parse(splitData[1]));
                 Actions.Dequeue();
                 //now queue up the training thing
             }
@@ -122,7 +121,7 @@ public class Spawn : MonoBehaviour
         }
         yield break;
     }
-    public void CreateTroop(HexCell cell, string type)
+    public void CreateTroop(HexCell cell, string type, int id)
     {
         GameObject troopObject;
         Enemy troop = null;
@@ -145,13 +144,12 @@ public class Spawn : MonoBehaviour
                 break;
         }
         troop.Type = type;
+        troop.ID = id;
         troop.Position = new Vector2Int(cell.Position.x, cell.Position.y);
         troop.InitializePosition(troop.Position);
         troop.OnPlayerTeam = IsPlayerSpawn;
-        _manager.Enemies.Add(troop);
         cell.Occupied = true;
         if (IsPlayerSpawn) _manager.PlayerEnemies.Add(troop);
         else _manager.EnemyEnemies.Add(troop);
-
     }
 }

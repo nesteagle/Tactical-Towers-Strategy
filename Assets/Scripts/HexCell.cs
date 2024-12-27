@@ -58,7 +58,6 @@ public class HexCell : MonoBehaviour
     public Vector3Int Position;// REMEMBER THAT Z= -x-y
     public List<HexCell> AdjacentTiles = new List<HexCell>();
     public bool Occupied = false;
-    public Tower Tower;
     public int Weight=0;
     public GameObject PathVisualizer;
 }
