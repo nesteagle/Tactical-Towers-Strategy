@@ -9,14 +9,14 @@ public static class HexData
     // 2* 0.58456714755 + x*2*0.58456714755 for exact tile radius.
 }
 
-//public static Vector3[] Corners = {
-//		new Vector3(0f, 0f, OuterRadius),
-//		new Vector3(InnerRadius, 0f, 0.5f * OuterRadius),
-//		new Vector3(InnerRadius, 0f, -0.5f * OuterRadius),
-//		new Vector3(0f, 0f, -OuterRadius),
-//		new Vector3(-InnerRadius, 0f, -0.5f * OuterRadius),
-//		new Vector3(-InnerRadius, 0f, 0.5f * OuterRadius)
-//	};
+/* public static Vector3[] Corners = {
+        new Vector3(0f, 0f, OuterRadius),
+        new Vector3(InnerRadius, 0f, 0.5f * OuterRadius),
+        new Vector3(InnerRadius, 0f, -0.5f * OuterRadius),
+        new Vector3(0f, 0f, -OuterRadius),
+        new Vector3(-InnerRadius, 0f, -0.5f * OuterRadius),
+        new Vector3(-InnerRadius, 0f, 0.5f * OuterRadius)
+}; */
 public class HexMap : MonoBehaviour
 {
     private readonly int _size = 13;
@@ -132,17 +132,6 @@ public class HexMap : MonoBehaviour
                 GenerateMountainRange(cell.index, mountainNumber / 2);
             }
         }
-        //if (mountainNumber < 1) return;
-        //int nextNumber = mountainNumber;
-        ////Cells[index].TerrainType = "Mountain";
-        ////Cells[symmetricalIndex].TerrainType = "Mountain";
-        //foreach (HexCell cell in Cells[index].AdjacentTiles) {
-        //	nextNumber--;
-        //	Debug.Log("made mountain " + nextNumber);
-        //	Cells[index].TerrainType = "Mountain";
-        //	Cells[symmetricalIndex].TerrainType = "Mountain";
-        //	if (cell) GenerateMountainRange(cell.index, mountainNumber/2);
-        //};
     }
     void GenerateControl(int index)
     {
@@ -187,22 +176,6 @@ public class HexMap : MonoBehaviour
             spawn.GetComponent<Spawn>().IsPlayerSpawn = false;
         }
     }
-    //void GenerateControlPoints(int controlPointIndex)
-    //{
-    //	int symmetricalIndex = _cellNumber - 1 - controlPointIndex;
-    //	Vector2Int basePosition = new Vector2Int(Cells[controlPointIndex].Position.x, Cells[controlPointIndex].Position.y);
-    //       for (int i = 0; i < 14; i++)
-    //       {
-    //           HexCell cell = ReturnHex(basePosition.x + Random.Range(-2, 3), basePosition.y + Random.Range(-2, 3));
-    //           if (cell.Weight == 0)
-    //           {
-    //               Cells[controlPointIndex].TerrainType = "Mountain";
-    //               Cells[symmetricalIndex].TerrainType = "Mountain";
-    //           }
-    //       }
-    //       Cells[controlPointIndex].TerrainType = "Spawn";
-    //	Cells[symmetricalIndex].TerrainType = "Spawn";
-    //}
     void CreateCell(int x, int y, int i)
     {
         Vector3 position; // Game object's position on screen
@@ -250,7 +223,7 @@ public class HexMap : MonoBehaviour
     {
         for (int i = 0; i < _cellNumber; i++)//3 * size * (size - 1) + 1)
         {
-            if (new Vector2Int(Cells[i].Position.x, Cells[i].Position.y) == new Vector2Int(x, y))
+            if (Cells[i].Position.x == x && Cells[i].Position.y == y)
             {
                 return Cells[i];
             }

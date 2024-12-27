@@ -46,7 +46,7 @@ public class UnitDetection : MonoBehaviour
     }
     private IEnumerator AttackEnemy(Enemy targetEnemy)
     {
-        yield return new WaitForSeconds(_enemy.Cooldown / 2f);
+        yield return new WaitForSeconds(_enemy.Cooldown * 1/3f);
         while (_enemy && targetEnemy.Health > 0)
         {
             //if (targetEnemy.Type != "Knight"&&_isArcher==false)
@@ -55,7 +55,7 @@ public class UnitDetection : MonoBehaviour
             //}
             //else
             targetEnemy.Health-=_enemy.Damage;
-            yield return new WaitForSeconds(_enemy.Cooldown);//maybe will be attack cooldown.
+            yield return new WaitForSeconds(_enemy.Cooldown * 2/3f);//maybe will be attack cooldown.
         }
         if (_enemy) _enemy.Attacking = false;
     }

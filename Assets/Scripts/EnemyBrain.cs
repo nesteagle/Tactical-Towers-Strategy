@@ -87,7 +87,7 @@ public class EnemyBrain : MonoBehaviour
         {
             if (ResourceGroup.Count < 3) // where 3 is max amt.
             {
-                int index = Manager.EnemySpawn.PlaceTroop("Scout");
+                int index = Game.EnemySpawn.PlaceTroop("Scout");
 
             }
         }

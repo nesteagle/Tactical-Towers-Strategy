@@ -16,7 +16,7 @@ public class ButtonControl : MonoBehaviour
     }
     public void PlaceArcher()
     {
-       Deploy.PlaceTroop("Archer");
+        Deploy.PlaceTroop("Archer");
     }
     public void PlaceKnight()
     {
@@ -25,6 +25,6 @@ public class ButtonControl : MonoBehaviour
     private IEnumerator WaitForLoad()
     {
         yield return new WaitForSeconds(0.2f);
-        Deploy = GameObject.Find("Control").GetComponent<Game>().PlayerSpawn;
+        Deploy = Game.PlayerSpawn;
     }
 }

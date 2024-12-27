@@ -26,9 +26,7 @@ public class Enemy : MonoBehaviour
     public float Cooldown; //when extending class set custom cooldowns.
     public float Damage;
     public bool OnPlayerTeam;
-    private Vector2Int _objectivePosition;
     private HexMap _map;
-    public Coroutine ActiveRoutine;
     private void Awake()
     {
         _map = GameObject.Find("HexGrid").GetComponent<HexMap>();
@@ -38,6 +36,10 @@ public class Enemy : MonoBehaviour
         HexMap hexMap = GameObject.Find("HexGrid").GetComponent<HexMap>();
         Vector3 pos = hexMap.ReturnHex(tilePosition.x, tilePosition.y).transform.position;
         transform.position = new Vector3(pos.x, pos.y, 0);
+    }
+    public List<HexCell> GetPath(int objTileX, int objTileY)
+    {
+        return Pathfinding.FindPath(_map.ReturnHex(Position.x, Position.y), _map.ReturnHex(objTileX, objTileY));
     }
     public bool FollowPath(int objTileX, int objTileY)
     {
@@ -59,7 +61,6 @@ public class Enemy : MonoBehaviour
     }
     private IEnumerator PathToTarget(int objTileX, int objTileY)
     {
-        //use recursion?
         List<HexCell> cellsToClear = new();
         Moving = true;
         while (Position.x != objTileX || Position.y != objTileY)
@@ -84,12 +85,6 @@ public class Enemy : MonoBehaviour
                 cellsToClear.Add(cell);
             }
             _hexPath[0].Occupied = false;
-            //if (_map.ReturnHex(objTileX, objTileY).Occupied)
-            //{
-            //    Debug.Log("DONE");
-            //    Moving = false;
-            //    yield break;
-            //}
             _hexPath[1].Occupied = true;
             yield return StartCoroutine(MovePosition(transform.position, _hexPath[1].transform.position, Speed));
             Position = new Vector2Int(_hexPath[1].Position.x, _hexPath[1].Position.y);
@@ -121,13 +116,6 @@ public class Enemy : MonoBehaviour
             Destroy(gameObject);
         }
     }
-    //private void FinishedPath()
-    //{
-    //    //Remove objective HP, if too low lose menu.
-    //    GameControl.health -= Damage;
-    //    Spawner.EnemiesRemaining--;
-    //    Destroy(gameObject);
-    //}
     private void ResetColors(HexCell c)
     {
         //will be obsolete after icons are added.

@@ -14,8 +14,10 @@ public class Game : MonoBehaviour
     public List<Enemy> EnemyEnemies = new();
     public HexCell PlayerSpawnCell;
     public HexCell EnemySpawnCell;
-    public Spawn PlayerSpawn;
-    public Spawn EnemySpawn;
+
+    public static Spawn PlayerSpawn;
+    public static Spawn EnemySpawn;
+    public static HexMap Map;
     // Start is called before the first frame update
     void Start()
     {

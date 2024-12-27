@@ -24,7 +24,12 @@ public class PathSelect : MonoBehaviour
         {
             if (!Input.GetMouseButton(0)&& cellPos.HasValue)
             {
-                _selectedEnemy.FollowPath(cellPos.Value.x,cellPos.Value.y);
+                List<HexCell> tempPath = _selectedEnemy.GetPath(cellPos.Value.x, cellPos.Value.y);
+               if (tempPath == null) Debug.Log("False, no path found"); 
+                else foreach (HexCell cell in tempPath) {
+                    Debug.Log(cell.name);
+                }
+                //_selectedEnemy.FollowPath(cellPos.Value.x,cellPos.Value.y);
                 ResetColors();
                 if (_hexPath.Count > 0)
                 {
@@ -49,6 +54,7 @@ public class PathSelect : MonoBehaviour
                 //possible select animation?
                 RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
                 if (hit.collider == null) continue;
+                if (_hexPath == null) continue;
                 HexCell cell;
                 if (hit.collider.gameObject.GetComponent<HexCell>())
                 {
@@ -72,7 +78,7 @@ public class PathSelect : MonoBehaviour
         //    _hexPath = Pathfinding.FindPath(hexMap.ReturnHex(position.x, position.y), hexMap.ReturnHex(clickedPos.x, clickedPos.y));
         //}
         _hexPath = Pathfinding.FindPath(hexMap.ReturnHex(position.x, position.y), hexMap.ReturnHex(clickedPos.x, clickedPos.y));
-        if (_hexPath.Count != 0)
+        if (_hexPath != null && _hexPath.Count != 0)
         {
             List<Vector3> pathToFollow = new();
             foreach (HexCell c in _hexPath)

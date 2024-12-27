@@ -29,35 +29,50 @@ public class HexCell : MonoBehaviour
             switch (_terrain)
             {
                 case "Forest":
-                    GetComponent<SpriteRenderer>().color = Color.green;
                     Weight = 2;
                     Occupied = false;
                     break;
                 case "Mountain":
-                    GetComponent<SpriteRenderer>().color = Color.cyan;
                     Weight = 2;
                     Occupied = true;
                     break;
-                case "Swamp":
-                    GetComponent<SpriteRenderer>().color = new Color(0.1725f,0.3f,0.231f);
-                    Occupied = true;
-                    break;
-                case "Spawn":
-                    GetComponent<SpriteRenderer>().color = Color.blue;
-                    break;
                 case "Control":
-                    GetComponent<SpriteRenderer>().color = Color.yellow;
                     Occupied = true;
                     break;
                 default:
-                    GetComponent<SpriteRenderer>().color = new Color(0.9f, 0.9f, 0.9f);
                     break;
             }
+            ResetColor();
         }
     }
     public Vector3Int Position;// REMEMBER THAT Z= -x-y
     public List<HexCell> AdjacentTiles = new List<HexCell>();
     public bool Occupied = false;
-    public int Weight=0;
+
+    // Occupying unit?
+
+    public int Weight = 0;
     public GameObject PathVisualizer;
+
+    public void ResetColor()
+    {
+        switch (TerrainType)
+        {
+            case "Forest":
+                GetComponent<SpriteRenderer>().color = Color.green;
+                break;
+            case "Mountain":
+                GetComponent<SpriteRenderer>().color = Color.cyan;
+                break;
+            case "Spawn":
+                GetComponent<SpriteRenderer>().color = Color.blue;
+                break;
+            case "Control":
+                GetComponent<SpriteRenderer>().color = Color.yellow;
+                break;
+            default:
+                GetComponent<SpriteRenderer>().color = new Color(0.9f, 0.9f, 0.9f);
+                break;
+        }
+    }
 }
