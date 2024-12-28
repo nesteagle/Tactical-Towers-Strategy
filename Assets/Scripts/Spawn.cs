@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using static UnityEngine.EventSystems.EventTrigger;
 
 public class Spawn : MonoBehaviour
 {
@@ -113,7 +114,7 @@ public class Spawn : MonoBehaviour
                 yield return new WaitForSeconds(_cooldownTimes[CheckUnit(splitData[0])]);
                 //play animation[CheckUnit(Actions.Peek().Split(" ")[0])];
                 //play animation (when made)
-                CreateTroop(_cell, splitData[0], int.Parse(splitData[1]));
+                CreateUnit(_cell, splitData[0], int.Parse(splitData[1]));
                 Actions.Dequeue();
                 //now queue up the training thing
             }
@@ -121,35 +122,36 @@ public class Spawn : MonoBehaviour
         }
         yield break;
     }
-    public void CreateTroop(HexCell cell, string type, int id)
+    public void CreateUnit(HexCell cell, string type, int id)
     {
-        GameObject troopObject;
-        Enemy troop = null;
+        GameObject unitObject;
+        Enemy unit = null;
         switch (type)
         {
             case "Knight":
-                troopObject = Instantiate(UnitPrefabs[0]);
-                troop = troopObject.GetComponent<Enemy>();
-                Instantiate(RangeDetectorPrefab[0], troop.transform);
+                unitObject = Instantiate(UnitPrefabs[0]);
+                unit = unitObject.GetComponent<Enemy>();
+                Instantiate(RangeDetectorPrefab[0], unit.transform);
                 break;
             case "Scout":
-                troopObject = Instantiate(UnitPrefabs[1]);
-                troop = troopObject.GetComponent<Enemy>();
-                Instantiate(RangeDetectorPrefab[0], troop.transform);
+                unitObject = Instantiate(UnitPrefabs[1]);
+                unit = unitObject.GetComponent<Enemy>();
+                Instantiate(RangeDetectorPrefab[0], unit.transform);
                 break;
             case "Archer":
-                troopObject = Instantiate(UnitPrefabs[2]);
-                troop = troopObject.GetComponent<Enemy>();
-                Instantiate(RangeDetectorPrefab[1], troop.transform);
+                unitObject = Instantiate(UnitPrefabs[2]);
+                unit = unitObject.GetComponent<Enemy>();
+                Instantiate(RangeDetectorPrefab[1], unit.transform);
                 break;
         }
-        troop.Type = type;
-        troop.ID = id;
-        troop.Position = new Vector2Int(cell.Position.x, cell.Position.y);
-        troop.InitializePosition(troop.Position);
-        troop.OnPlayerTeam = IsPlayerSpawn;
+        unit.Type = type;
+        unit.ID = id;
+        unit.Position = new Vector2Int(cell.Position.x, cell.Position.y);
+        Vector3 pos = Game.Map.ReturnHex(unit.Position.x, unit.Position.y).transform.position;
+        unit.transform.position = new Vector3(pos.x, pos.y, 0);
+        unit.OnPlayerTeam = IsPlayerSpawn;
         cell.Occupied = true;
-        if (IsPlayerSpawn) _manager.PlayerEnemies.Add(troop);
-        else _manager.EnemyEnemies.Add(troop);
+        if (IsPlayerSpawn) _manager.PlayerEnemies.Add(unit);
+        else _manager.EnemyEnemies.Add(unit);
     }
 }

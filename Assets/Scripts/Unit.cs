@@ -35,7 +35,7 @@ public class Unit : MonoBehaviour
     public Vector2Int TilePosition;
     // Position is the current tile position of the unit.
 
-    public string State;
+    public string State = "Rest";
     // State is one of "Rest" "Attacking" "Moving"; current status of unit.
 
     public string Type;
@@ -56,10 +56,32 @@ public class Unit : MonoBehaviour
     public void MoveTo(int objectiveX, int objectiveY)
     {
         List<HexCell> path = CheckPath(objectiveX, objectiveY);
-        if (path != null)
+        if (State == "Moving" && path != null)
         {
             // coroutine for moving.
         }
+    }
+    private IEnumerator MoveCoroutine(int objectiveX, int objectiveY)
+    {
+        while (TilePosition.x != objectiveX && TilePosition.y != objectiveY)
+        {
+            List<HexCell> path = CheckPath(objectiveX, objectiveY);
+            if (path == null)
+            {
+                State = "Rest";
+                yield return new WaitUntil(() => path != null);
+            }
+
+            State = "Moving";
+            yield return StartCoroutine(MovePosition(transform.localPosition, path[1].transform.localPosition, Speed));
+            TilePosition = new Vector2Int(path[1].Position.x, path[1].Position.y);
+            path[0].ResetColor();
+            path[1].ResetColor();
+        }
+        /// !!!
+
+        State = "Rest";
+        yield break;
     }
     private IEnumerator MovePosition(Vector3 pos1, Vector3 pos2, float speed)
     {

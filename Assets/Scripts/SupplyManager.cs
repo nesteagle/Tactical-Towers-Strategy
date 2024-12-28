@@ -30,7 +30,8 @@ public class SupplyManager : MonoBehaviour
         Enemy enemy = enemyObject.GetComponent<Enemy>();
         enemy.Type = "Supply";
         enemy.Position = new Vector2Int(baseCell.Position.x, baseCell.Position.y);
-        enemy.InitializePosition(enemy.Position);
+        Vector3 pos = Game.Map.ReturnHex(enemy.Position.x, enemy.Position.y).transform.position;
+        enemy.transform.position = new Vector3(pos.x, pos.y, 0);
         enemy.OnPlayerTeam = onPlayerTeam;
         Suppliers.Add(enemy);
         return enemy;

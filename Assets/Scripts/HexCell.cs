@@ -25,19 +25,19 @@ public class HexCell : MonoBehaviour
         {
             _terrain = value;
             Weight = 1;
-            Occupied = false;
+            Obstructed = false;
             switch (_terrain)
             {
                 case "Forest":
                     Weight = 2;
-                    Occupied = false;
+                    Obstructed = false;
                     break;
                 case "Mountain":
                     Weight = 2;
-                    Occupied = true;
+                    Obstructed = true;
                     break;
                 case "Control":
-                    Occupied = true;
+                    Obstructed = true;
                     break;
                 default:
                     break;
@@ -47,10 +47,10 @@ public class HexCell : MonoBehaviour
     }
     public Vector3Int Position;// REMEMBER THAT Z= -x-y
     public List<HexCell> AdjacentTiles = new List<HexCell>();
+    public bool Obstructed = false;
+    // Obstructed is boolean based on terrain type.
     public bool Occupied = false;
-
-    // Occupying unit?
-
+    // Occupied is boolean based on whether a unit is on the tile.
     public int Weight = 0;
     public GameObject PathVisualizer;
 

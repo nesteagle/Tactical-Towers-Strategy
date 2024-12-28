@@ -32,7 +32,7 @@ public class Pathfinding : MonoBehaviour
 
             foreach (HexCell adjacentTile in currentTile.AdjacentTiles)
             {
-                if (adjacentTile == null|| closedPathTiles.Contains(adjacentTile) || adjacentTile.Occupied )
+                if (adjacentTile == null|| closedPathTiles.Contains(adjacentTile) || adjacentTile.Obstructed || adjacentTile.Occupied)
                 {
                     continue;
                 }

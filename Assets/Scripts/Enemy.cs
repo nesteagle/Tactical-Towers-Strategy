@@ -31,16 +31,12 @@ public class Enemy : MonoBehaviour
     {
         _map = GameObject.Find("HexGrid").GetComponent<HexMap>();
     }
-    public void InitializePosition(Vector2Int tilePosition)
-    {
-        HexMap hexMap = GameObject.Find("HexGrid").GetComponent<HexMap>();
-        Vector3 pos = hexMap.ReturnHex(tilePosition.x, tilePosition.y).transform.position;
-        transform.position = new Vector3(pos.x, pos.y, 0);
-    }
-    public List<HexCell> GetPath(int objTileX, int objTileY)
-    {
-        return Pathfinding.FindPath(_map.ReturnHex(Position.x, Position.y), _map.ReturnHex(objTileX, objTileY));
-    }
+    //public void InitializePosition(Vector2Int tilePosition)
+    //{
+    //    HexMap hexMap = GameObject.Find("HexGrid").GetComponent<HexMap>();
+    //    Vector3 pos = hexMap.ReturnHex(tilePosition.x, tilePosition.y).transform.position;
+    //    transform.position = new Vector3(pos.x, pos.y, 0);
+    //}
     public bool FollowPath(int objTileX, int objTileY)
     {
         Vector3Int finalPosition;
@@ -68,7 +64,7 @@ public class Enemy : MonoBehaviour
             _hexPath = Pathfinding.FindPath(_map.ReturnHex(Position.x, Position.y), _map.ReturnHex(objTileX, objTileY));
             for (int i=_hexPath.Count-1;i>=0 ;i--)
             {
-                if (_hexPath[i].Occupied == true)
+                if (_hexPath[i].Obstructed || _hexPath[i].Occupied)
                 {
                     _hexPath.RemoveAt(i);
                 }

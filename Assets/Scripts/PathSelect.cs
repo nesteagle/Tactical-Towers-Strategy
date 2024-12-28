@@ -24,11 +24,6 @@ public class PathSelect : MonoBehaviour
         {
             if (!Input.GetMouseButton(0)&& cellPos.HasValue)
             {
-                List<HexCell> tempPath = _selectedEnemy.GetPath(cellPos.Value.x, cellPos.Value.y);
-               if (tempPath == null) Debug.Log("False, no path found"); 
-                else foreach (HexCell cell in tempPath) {
-                    Debug.Log(cell.name);
-                }
                 //_selectedEnemy.FollowPath(cellPos.Value.x,cellPos.Value.y);
                 ResetColors();
                 if (_hexPath.Count > 0)
