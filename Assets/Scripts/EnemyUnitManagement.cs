@@ -9,7 +9,7 @@ public class EnemyUnitManagement : MonoBehaviour
 {
     // Start is called before the first frame update
     public Game Manager;
-    private List<Unit> _playerTroops=new();
+    private List<Unit> _playerTroops = new();
     private List<Vector2> _playerTroopPositions = new();
     public GameObject TempRenderObject;
 
@@ -33,8 +33,8 @@ public class EnemyUnitManagement : MonoBehaviour
     }
     private List<Unit> CheckPlayerTroops()
     {
-        List<Unit> playerTroops=new();
-        foreach(Unit unit in Manager.Units)
+        List<Unit> playerTroops = new();
+        foreach (Unit unit in Manager.Units)
         {
             if (unit.Team == "Player")
             {
@@ -47,8 +47,8 @@ public class EnemyUnitManagement : MonoBehaviour
     public List<float> GetScores()
     {
         Dictionary<Unit, List<Unit>> enemies = GetUnitGroups();
-        List<float> scores=new();
-        foreach(KeyValuePair<Unit, List<Unit>> pair in enemies)
+        List<float> scores = new();
+        foreach (KeyValuePair<Unit, List<Unit>> pair in enemies)
         {
             scores.Add((pair.Key.transform.position.y + pair.Value.Count + 14f) * 0.12f);
         }
@@ -158,15 +158,15 @@ public class EnemyUnitManagement : MonoBehaviour
                     break;
             }
         }
-        composition[2]+= Mathf.FloorToInt(unitValues[1] / 2.5f);
+        composition[2] += Mathf.FloorToInt(unitValues[1] / 2.5f);
         //an archer for every floor(2x/5) knights
-        composition[1]+= Mathf.FloorToInt(unitValues[1] *1.5f);
+        composition[1] += Mathf.FloorToInt(unitValues[1] * 1.5f);
         composition[0] += Mathf.FloorToInt(unitValues[0] * 1.5f);
         //maybe economic consideration to comp[1]
         if (unitValues[2] >= 2)
         {
             //maybe add economic consideration here up above^^
-            composition[1] += Mathf.FloorToInt(unitValues[2]*1.5f);
+            composition[1] += Mathf.FloorToInt(unitValues[2] * 1.5f);
         }
         else composition[0] += Mathf.RoundToInt(unitValues[2] * 1.5f);
         foreach (int i in composition)

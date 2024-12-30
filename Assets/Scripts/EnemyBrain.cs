@@ -25,10 +25,10 @@ public class EnemyBrain : MonoBehaviour
         CalculateEconomyWeight();
         CalculateMilitaryWeight();
 
-        Debug.Log("ECONOMYWEIGHT"+_economyWeight);
+        Debug.Log("ECONOMYWEIGHT" + _economyWeight);
         Debug.Log("MILITARYWEIGHT" + _militaryWeight);
 
-        int randomValue = Random.Range(1,_economyWeight+_militaryWeight+1);
+        int randomValue = Random.Range(1, _economyWeight + _militaryWeight + 1);
         Debug.Log(randomValue);
         if (randomValue <= _economyWeight)
         {
@@ -63,17 +63,21 @@ public class EnemyBrain : MonoBehaviour
             StartCoroutine(Think());
         }
     }
-    private void CalculateEconomyWeight() {
+    private void CalculateEconomyWeight()
+    {
         _economyWeight = Mathf.Abs((Manager.PlayerVillages.Count - Manager.EnemyVillages.Count) * 15);
     }
-    private void CalculateMilitaryWeight() {
-        float score=0;
-        foreach (float f in UnitManagement.GetScores()){
+    private void CalculateMilitaryWeight()
+    {
+        float score = 0;
+        foreach (float f in UnitManagement.GetScores())
+        {
             score += f;
         }
-        _militaryWeight = Mathf.RoundToInt(score*1.3f);
+        _militaryWeight = Mathf.RoundToInt(score * 1.3f);
     }
-    private void ManageScouts() {
+    private void ManageScouts()
+    {
         // If # of scouts < max, create one. Otherwise, send them to explore.
         if (ResourceGroup.Count > 0)
         {

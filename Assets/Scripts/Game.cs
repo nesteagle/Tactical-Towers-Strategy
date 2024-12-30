@@ -36,7 +36,7 @@ public class Game : MonoBehaviour
         PlayerSpawn = PlayerSpawnCell.GetComponentInChildren<Spawn>();
         EnemySpawn = EnemySpawnCell.GetComponentInChildren<Spawn>();
     }
-    
+
     public HashSet<Unit> RemoveUnit(Unit toRemove)
     {
         if (toRemove != null)

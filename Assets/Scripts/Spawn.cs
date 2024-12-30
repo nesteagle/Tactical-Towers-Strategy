@@ -156,8 +156,8 @@ public class Spawn : MonoBehaviour
         else unit.Team = "Enemy";
 
         unit.State = "Moving";
-        unit.transform.position = new Vector3(0,-100);
-        
+        unit.transform.position = new Vector3(0, -100);
+
         _manager.AddUnit(unit);
         return unit;
     }

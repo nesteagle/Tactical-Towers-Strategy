@@ -24,7 +24,7 @@ public class HexMap : MonoBehaviour
     public GameObject CellPrefab;
 
     public HexCell[] Cells;
-    private Dictionary<(int x, int y), HexCell> _cellDictionary = new Dictionary<(int, int), HexCell>();
+    private Dictionary<(int x, int y), HexCell> _cellDictionary = new();
 
     private readonly int _chanceEmpty = 12;
     private readonly int _chanceForest = 6;

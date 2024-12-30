@@ -12,7 +12,7 @@ public class SelectPath : MonoBehaviour
     // Since this script is attached to each Unit prefab, _unit = GetComponent<Unit>()
 
     private Unit _unit;
-    private List<HexCell> _pathToClear = new List<HexCell>();
+    private List<HexCell> _pathToClear = new();
     HexCell _targetCell;
 
     private void Awake()

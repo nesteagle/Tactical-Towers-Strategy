@@ -22,11 +22,11 @@ public class UnitDetection : MonoBehaviour
             {
                 //_enemy.StopAllCoroutines(); //maybe add movement check first.
                 _unit.State = "Attacking";
-                _attackRoutine=StartCoroutine(AttackUnit(target));
+                _attackRoutine = StartCoroutine(AttackUnit(target));
                 return;
             }
         }
-        }
+    }
     private void OnTriggerExit2D(Collider2D collision)
     {
         if (!collision.gameObject.CompareTag("Enemy")) return;
@@ -43,11 +43,11 @@ public class UnitDetection : MonoBehaviour
     }
     private IEnumerator AttackUnit(Unit target)
     {
-        yield return new WaitForSeconds(_unit.Cooldown * 1/3f);
+        yield return new WaitForSeconds(_unit.Cooldown * 1 / 3f);
         while (_unit && target.Health > 0)
         {
-            target.Health-= _unit.AttackDamage;
-            yield return new WaitForSeconds(_unit.Cooldown * 2/3f);//maybe will be attack cooldown.
+            target.Health -= _unit.AttackDamage;
+            yield return new WaitForSeconds(_unit.Cooldown * 2 / 3f);//maybe will be attack cooldown.
         }
         if (_unit) _unit.State = "Rest";
     }

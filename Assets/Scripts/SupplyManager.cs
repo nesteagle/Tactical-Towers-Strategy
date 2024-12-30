@@ -67,7 +67,7 @@ public class SupplyManager : MonoBehaviour
     {
         if (endAdjacent)
         {
-            while (!AdjacentToDest(supplier,destination))
+            while (!AdjacentToDest(supplier, destination))
             {
                 yield return new WaitUntil(() => AdjacentToDest(supplier, destination) || supplier.State == "Rest");
                 supplier.MoveTo(destination);
@@ -75,7 +75,7 @@ public class SupplyManager : MonoBehaviour
         }
         else
         {
-            while (!AtDest(supplier,destination))
+            while (!AtDest(supplier, destination))
             {
                 yield return new WaitUntil(() => AtDest(supplier, destination) || supplier.State == "Rest");
                 supplier.MoveTo(destination);

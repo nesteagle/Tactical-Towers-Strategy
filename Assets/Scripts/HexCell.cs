@@ -46,7 +46,7 @@ public class HexCell : MonoBehaviour
         }
     }
     public Vector3Int Position;// REMEMBER THAT Z= -x-y
-    public List<HexCell> AdjacentTiles = new List<HexCell>();
+    public List<HexCell> AdjacentTiles = new();
     public bool Obstructed = false;
     // Obstructed is boolean based on terrain type.
     public bool Occupied = false;

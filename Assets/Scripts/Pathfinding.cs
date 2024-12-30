@@ -8,8 +8,8 @@ public class Pathfinding : MonoBehaviour
     public static List<HexCell> FindPath(HexCell startPoint, HexCell endPoint)
     {
 
-        List<HexCell> openPathTiles = new List<HexCell>();
-        List<HexCell> closedPathTiles = new List<HexCell>();
+        List<HexCell> openPathTiles = new();
+        List<HexCell> closedPathTiles = new();
 
         HexCell currentTile = startPoint;
 
