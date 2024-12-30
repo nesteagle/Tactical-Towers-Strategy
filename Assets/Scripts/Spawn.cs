@@ -13,7 +13,7 @@ public class Spawn : MonoBehaviour
     public RectTransform DeployTransform;
     public Canvas DeployMenu;
     private HexCell _cell;
-    private bool _menuOpened;
+    public bool MenuOpened;
     public bool IsPlayerSpawn;
     private Game _manager;
     public Queue<Unit> Actions = new();
@@ -31,16 +31,16 @@ public class Spawn : MonoBehaviour
     }
     private void OnMouseDown()
     {
-        if (_menuOpened)
+        if (MenuOpened)
         {
-            _menuOpened = false;
+            MenuOpened = false;
             DeployMenu.enabled = false;
         }
         else
         {
             DeployMenu.enabled = true;
             DeployTransform.position = _cell.transform.position + new Vector3(3f, 0);
-            _menuOpened = true;
+            MenuOpened = true;
             // add a method in DeployMenu to close itself.
         }
     }

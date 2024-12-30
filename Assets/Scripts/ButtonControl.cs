@@ -4,12 +4,7 @@ using UnityEngine;
 
 public class ButtonControl : MonoBehaviour
 {
-    //public Spawn Deploy;
-
-    //private void Awake()
-    //{
-    //    Deploy = Game.PlayerSpawn;
-    //}
+    public Canvas DeployMenu;
     public void PlaceScout()
     {
         Game.PlayerSpawn.PlaceTroop("Scout");
@@ -22,9 +17,9 @@ public class ButtonControl : MonoBehaviour
     {
         Game.PlayerSpawn.PlaceTroop("Knight");
     }
-    //private IEnumerator WaitForLoad()
-    //{
-    //    yield return new WaitForSeconds(0.2f);
-    //    Deploy = Game.PlayerSpawn;
-    //}
+    public void CloseMenu()
+    {
+        DeployMenu.enabled = false;
+        Game.PlayerSpawn.MenuOpened = false;
+    }
 }
