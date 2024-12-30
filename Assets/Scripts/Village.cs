@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Village : MonoBehaviour
@@ -7,10 +9,10 @@ public class Village : MonoBehaviour
     public HexCell Cell;
     private SupplyManager _supplyManager;
     private Game _manager;
-    private List<Enemy> _playerControl = new List<Enemy>();
-    private List<Enemy> _enemyControl = new List<Enemy>();
+    private HashSet<Unit> _playerControl = new HashSet<Unit>();
+    private HashSet<Unit> _enemyControl = new HashSet<Unit>();
     public float Control;
-    private Enemy _supplier;
+    private Unit _supplier;
     private Coroutine _supplyRoutine;
     public SpriteRenderer Renderer;
     // Start is called before the first frame update
@@ -25,55 +27,63 @@ public class Village : MonoBehaviour
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (!collision.gameObject.CompareTag("Enemy")) return;
-        Enemy enemy = collision.gameObject.GetComponent<Enemy>();
-        if (enemy.OnPlayerTeam)
+        if (!collision.gameObject.CompareTag("Unit")) return;
+        Unit collidedUnit = collision.gameObject.GetComponent<Unit>();
+        if (collidedUnit.Team == "Player")
         {
-            if (!_playerControl.Contains(enemy)) _playerControl.Add(enemy);
+            if (!_playerControl.Contains(collidedUnit)) _playerControl.Add(collidedUnit);
         }
-        else if (!_enemyControl.Contains(enemy)) _enemyControl.Add(enemy);
+        else if (!_enemyControl.Contains(collidedUnit)) _enemyControl.Add(collidedUnit);
     }
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (!collision.gameObject.CompareTag("Enemy")) return;
-        Enemy enemy = collision.gameObject.GetComponent<Enemy>();
-        if (enemy.OnPlayerTeam)
+        if (!collision.gameObject.CompareTag("Unit")) return;
+        Unit collidedUnit = collision.gameObject.GetComponent<Unit>();
+        if (collidedUnit.Team == "Player")
         {
-            if (_playerControl.Contains(enemy)) _playerControl.Remove(enemy);
+            _playerControl.Remove(collidedUnit);
         }
-        else if (_enemyControl.Contains(enemy)) _enemyControl.Remove(enemy);
+        else _enemyControl.Remove(collidedUnit);
     }
     private void FixedUpdate()
     {
-        Control += (_playerControl.Count-_enemyControl.Count) * 0.125f * Time.fixedDeltaTime;
+        Control += (_playerControl.Count - _enemyControl.Count) * 0.125f * Time.fixedDeltaTime;
+        if (Control > 1f)
+        {
+            Control = 1f;
+        }
+        if (Control < -1f)
+        {
+            Control = -1f;
+        }
     }
     private IEnumerator UpdateVillage()
     {
-        while (true) {//while game running
-            yield return new WaitUntil(() => Control > 1f || Control < 1f);
-            if (Control > 1f)
+        while (_manager)
+        {//while game running
+            yield return new WaitUntil(() => Control >= 1f || Control <= -1f);
+            if (Control >= 1f)
             {
                 Control = 1f;
-                if (_supplyRoutine == null) _supplyRoutine = StartCoroutine(SpawnSupply(_manager.PlayerSpawnCell, true)); //eventually add this method to basecell and have queue system
+                _manager.PlayerVillages.Add(Cell);
+                if (_supplyRoutine == null) _supplyRoutine = StartCoroutine(SpawnSupply(_manager.PlayerSpawnCell, true));
+                yield return new WaitUntil(() => Control < 0.5f);
+                if (_manager.PlayerVillages.Contains(Cell)) _manager.PlayerVillages.Remove(Cell);
             }
-            if (Control < -1f)
+            if (Control <= -1f)
             {
                 Control = -1f;
+                _manager.EnemyVillages.Add(Cell);
                 if (_supplyRoutine == null) _supplyRoutine = StartCoroutine(SpawnSupply(_manager.EnemySpawnCell, false));
-            }
-            if (-0.5f>Control && 0.5f < Control)
-            {
-                if (_manager.PlayerVillages.Contains(Cell)) _manager.PlayerVillages.Remove(Cell);
-                else if (_manager.EnemyVillages.Contains(Cell))_manager.EnemyVillages.Remove(Cell);
+                yield return new WaitUntil(() => Control > -0.5f);
+                if (_manager.EnemyVillages.Contains(Cell)) _manager.EnemyVillages.Remove(Cell);
             }
         }
     }
     private IEnumerator SpawnSupply(HexCell baseCell, bool onPlayerTeam)
     {
-        if (onPlayerTeam) if (!_manager.PlayerVillages.Contains(Cell)) _manager.PlayerVillages.Add(Cell);
-        else if (_manager.EnemyVillages.Contains(Cell)) _manager.EnemyVillages.Add(Cell);
-        yield return new WaitForSeconds(2.5f);//can do anim here
-        _supplier = _supplyManager.SpawnSupplyUnit(baseCell,onPlayerTeam);
+        yield return new WaitForSeconds(2.5f);
+        _supplier = _supplyManager.SpawnSupplyUnit(baseCell, onPlayerTeam);
         _supplier.StartCoroutine(_supplyManager.SupplyVillage(_supplier, Cell, baseCell));
     }
 }

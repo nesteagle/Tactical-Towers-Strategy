@@ -27,13 +27,19 @@ public class Pathfinding : MonoBehaviour
 
             if (currentTile == endPoint)
             {
-                return GetFinalPath(); // Success.
+                return GetFinalPath();
             }
 
             foreach (HexCell adjacentTile in currentTile.AdjacentTiles)
             {
-                if (adjacentTile == null || closedPathTiles.Contains(adjacentTile) || adjacentTile.Obstructed || adjacentTile.Occupied)
+                if (adjacentTile == null || closedPathTiles.Contains(adjacentTile) || adjacentTile.Occupied) continue;
+                if (adjacentTile.Obstructed)
                 {
+                    if (adjacentTile == endPoint)
+                    {
+                        List<HexCell> path = GetFinalPath();
+                        return path.Take(path.Count - 1).ToList();
+                    }
                     continue;
                 }
 

@@ -10,84 +10,86 @@ public class SupplyManager : MonoBehaviour
     public HexCell TargetVillage;
     private HexCell _spawn;
     public Game Manager;
-    public List<Enemy> Suppliers = new List<Enemy>();
-    public List<Coroutine> ActiveRoutines = new List<Coroutine>();
-    private Dictionary<Enemy, HexCell> _adjacentSpawns=new();
-    void Start()
-    {
-        //StartCoroutine(WaitForLoad());
-    }
-    private IEnumerator WaitForLoad()
-    {
-        yield return new WaitForSeconds(1f);
-        
-    }
+    public List<Unit> Suppliers = new();
+    public List<Coroutine> ActiveRoutines = new();
+    private Dictionary<Unit, HexCell> _adjacentSpawns = new();
 
-    public Enemy SpawnSupplyUnit(HexCell baseCell, bool onPlayerTeam)
+    public Unit SpawnSupplyUnit(HexCell baseCell, bool onPlayerTeam)
     {
-        GameObject enemyObject;
-        enemyObject = Instantiate(SupplyPrefab);
-        Enemy enemy = enemyObject.GetComponent<Enemy>();
-        enemy.Type = "Supply";
-        enemy.Position = new Vector2Int(baseCell.Position.x, baseCell.Position.y);
-        Vector3 pos = Game.Map.ReturnHex(enemy.Position.x, enemy.Position.y).transform.position;
-        enemy.transform.position = new Vector3(pos.x, pos.y, 0);
-        enemy.OnPlayerTeam = onPlayerTeam;
-        Suppliers.Add(enemy);
-        return enemy;
+        GameObject unitObject;
+        unitObject = Instantiate(SupplyPrefab);
+        Unit unit = unitObject.GetComponent<Unit>();
+        unit.Type = "Supply";
+        unit.TilePosition = new Vector2Int(baseCell.Position.x, baseCell.Position.y);
+        Vector3 pos = baseCell.transform.position;
+        unit.transform.position = new Vector3(pos.x, pos.y, 0);
+        if (onPlayerTeam) unit.Team = "Player";
+        else unit.Team = "Enemy";
+        Suppliers.Add(unit);
+        unit.State = "Rest";
+        return unit;
         //StartCoroutine(SupplyVillage(enemy, villageCell, baseCell));
     }
-    private void CheckSupplyPoints(Enemy e)
+    private void CheckSupplyPoints(Unit e)
     {
         foreach (HexCell c in _spawn.AdjacentTiles)
         {
-            if (!_adjacentSpawns.ContainsValue(c)&& !_adjacentSpawns.ContainsKey(e))
+            if (!_adjacentSpawns.ContainsValue(c) && !_adjacentSpawns.ContainsKey(e))
             {
-                Debug.Log("added");
                 _adjacentSpawns.Add(e, c);
             }
         }
     }
-    public IEnumerator SupplyVillage(Enemy enemy, HexCell villageCell, HexCell baseCell)
+    public IEnumerator SupplyVillage(Unit supplier, HexCell villageCell, HexCell baseCell)
     {
         if (!_spawn)
         {
-            if (enemy.OnPlayerTeam) _spawn = Manager.PlayerSpawnCell;
+            if (supplier.Team == "Player") _spawn = Manager.PlayerSpawnCell;
             else _spawn = Manager.EnemySpawnCell;
         }
-        while (enemy)
+        while (supplier)
         {
+            CheckSupplyPoints(supplier);
             yield return new WaitForSeconds(2f);
-            //Debug.Log("starting");
-            CheckSupplyPoints(enemy);
-            if (enemy.FollowPath(villageCell.Position.x, villageCell.Position.y) == false)
-            {
-                yield return new WaitUntil(() => enemy.FollowPath(villageCell.Position.x, villageCell.Position.y) == true);
-            }// ONE FLAW: if path gets blocked mid-pathing, enemy will freeze.
-            //while (Vector2.Distance(enemy.transform.position, villageCell.transform.position) >= HexData.CellDiameter + 0.05f)
-            //{
-            //    if (enemy.FollowPath(villageCell.Position.x, villageCell.Position.y) == false&&enemy.Moving==false)
-            //    {
-            //        yield return new WaitUntil(() => enemy.FollowPath(villageCell.Position.x, villageCell.Position.y) == true);
-            //    }
-            //    yield return new WaitForSeconds(1.5f);
-            //}
-            yield return new WaitUntil(() => Vector2.Distance(enemy.transform.position, villageCell.transform.position) <= HexData.CellDiameter + 0.05f);
-            Debug.Log("there now");
+
+            yield return StartCoroutine(MoveWhenValid(supplier, villageCell, true));
             yield return new WaitForSeconds(2f);
-            enemy.FollowPath(_adjacentSpawns[enemy].Position.x, _adjacentSpawns[enemy].Position.y);
-            yield return new WaitUntil(() => Vector2.Distance(enemy.transform.position, _adjacentSpawns[enemy].transform.position) <= HexData.CellDiameter + 0.05f);
-            //Debug.Log("done route");
+            yield return StartCoroutine(MoveWhenValid(supplier, _adjacentSpawns[supplier], false));
             yield return new WaitForSeconds(1f);
-            if (enemy.OnPlayerTeam == true)
-            {
-                Manager.PlayerCoins += 3;//maybe change amount
-            }
-            else
-            {
-                Manager.EnemyCoins += 3;
-            }
-            _adjacentSpawns.Remove(enemy);
+
+            if (supplier.Team == "Player")
+                Manager.PlayerCoins += 3;
+            else Manager.EnemyCoins += 3;
+            _adjacentSpawns.Remove(supplier);
         }
+    }
+    private IEnumerator MoveWhenValid(Unit supplier, HexCell destination, bool endAdjacent)
+    {
+        if (endAdjacent)
+        {
+            while (!AdjacentToDest(supplier,destination))
+            {
+                yield return new WaitUntil(() => AdjacentToDest(supplier, destination) || supplier.State == "Rest");
+                supplier.MoveTo(destination);
+            }
+        }
+        else
+        {
+            while (!AtDest(supplier,destination))
+            {
+                yield return new WaitUntil(() => AtDest(supplier, destination) || supplier.State == "Rest");
+                supplier.MoveTo(destination);
+            }
+        }
+        supplier.State = "Rest";
+    }
+    private bool AdjacentToDest(Unit supplier, HexCell destination)
+    {
+        return destination.AdjacentTiles.Contains(Game.Map.ReturnHex(supplier.TilePosition.x, supplier.TilePosition.y));
+    }
+
+    private bool AtDest(Unit supplier, HexCell destination)
+    {
+        return destination == Game.Map.ReturnHex(supplier.TilePosition.x, supplier.TilePosition.y);
     }
 }

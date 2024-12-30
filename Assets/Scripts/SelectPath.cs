@@ -22,6 +22,7 @@ public class SelectPath : MonoBehaviour
 
     private void OnMouseDrag()
     {
+        if (_unit.State != "Rest") return;
         RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
         if (hit.collider == null) return;
 
@@ -51,10 +52,9 @@ public class SelectPath : MonoBehaviour
 
     private void OnMouseUp()
     {
-        Debug.Log(_targetCell);
         if (_targetCell == null) return;
-        _unit.MoveTo(_targetCell.Position.x, _targetCell.Position.y);
-        ClearPath(_pathToClear);
+        _unit.MoveTo(_targetCell);
+        StartCoroutine(ClearOnRest());
     }
     private void ClearPath(List<HexCell> path)
     {
@@ -65,5 +65,10 @@ public class SelectPath : MonoBehaviour
                 c.ResetColor();
             }
         }
+    }
+    private IEnumerator ClearOnRest()
+    {
+        yield return new WaitUntil(() => _unit.State == "Rest");
+        ClearPath(_pathToClear);
     }
 }

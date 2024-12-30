@@ -42,28 +42,28 @@ public class Unit : MonoBehaviour
     public string Team;
     // Team is one of "Player" "Enemy"; team the unit is fighting for.
 
-    public List<HexCell> CheckPath(int objectiveX, int objectiveY)
+    public List<HexCell> CheckPath(HexCell destination)
     {
-        List<HexCell> path = Pathfinding.FindPath(Game.Map.ReturnHex(TilePosition.x, TilePosition.y), Game.Map.ReturnHex(objectiveX, objectiveY));
+        List<HexCell> path = Pathfinding.FindPath(Game.Map.ReturnHex(TilePosition.x, TilePosition.y), destination);
         return path;
         // path is:
         // null - if not pathable
         // List<HexCell> - if successful
     }
 
-    public void MoveTo(int objectiveX, int objectiveY)
+    public void MoveTo(HexCell destination)
     {
-        List<HexCell> path = CheckPath(objectiveX, objectiveY);
+        List<HexCell> path = CheckPath(destination);
         if (State == "Rest" && path != null)
         {
-            StartCoroutine(MoveCoroutine(objectiveX, objectiveY));
+            StartCoroutine(MoveCoroutine(destination));
         }
     }
-    private IEnumerator MoveCoroutine(int objectiveX, int objectiveY)
+    private IEnumerator MoveCoroutine(HexCell destination)
     {
-        while (TilePosition.x != objectiveX || TilePosition.y != objectiveY)
+        while (TilePosition.x != destination.Position.x || TilePosition.y != destination.Position.y)
         {
-            List<HexCell> path = CheckPath(objectiveX, objectiveY);
+            List<HexCell> path = CheckPath(destination);
             if (path == null)
             {
                 State = "Rest";

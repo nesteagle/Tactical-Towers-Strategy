@@ -10,12 +10,12 @@ GameObject:
   m_Component:
   - component: {fileID: 899556667068365615}
   - component: {fileID: 899556667068365614}
-  - component: {fileID: 899556667068365609}
+  - component: {fileID: -8865472314936004977}
   - component: {fileID: -8085479243790237916}
   - component: {fileID: 2714512583496371541}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: SupplyUnit
-  m_TagString: Enemy
+  m_TagString: Unit
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -27,13 +27,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 899556667068365608}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &899556667068365614
 SpriteRenderer:
@@ -87,7 +87,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &899556667068365609
+--- !u!114 &-8865472314936004977
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -96,18 +96,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 899556667068365608}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 74af1a954c1097e4b9f501e335bbf67e, type: 3}
+  m_Script: {fileID: 11500000, guid: 23cf8ce238c1cc2439461c317fc0abaa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   LocalHealth: 2
-  Speed: 1.6
-  Position: {x: 0, y: 0}
-  Type: Supply
-  Moving: 0
-  Attacking: 0
+  Speed: 1.75
+  AttackDamage: 0.5
   Cooldown: 1.5
-  Damage: 0.5
-  OnPlayerTeam: 0
+  TilePosition: {x: 0, y: 0}
+  State: Rest
+  Type: 
+  Team: 
 --- !u!58 &-8085479243790237916
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -118,6 +117,25 @@ CircleCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
@@ -141,6 +159,12 @@ Rigidbody2D:
   m_AngularDrag: 0
   m_GravityScale: 0
   m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
   m_Interpolate: 0
   m_SleepingMode: 2
   m_CollisionDetection: 0

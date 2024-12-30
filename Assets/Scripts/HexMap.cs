@@ -22,7 +22,10 @@ public class HexMap : MonoBehaviour
     private readonly int _size = 13;
     private int _cellNumber;
     public GameObject CellPrefab;
+
     public HexCell[] Cells;
+    private Dictionary<(int x, int y), HexCell> _cellDictionary = new Dictionary<(int, int), HexCell>();
+
     private readonly int _chanceEmpty = 12;
     private readonly int _chanceForest = 6;
     private readonly int _chanceMountain = 2;
@@ -82,12 +85,10 @@ public class HexMap : MonoBehaviour
         {
             int randomIndex2 = Random.Range(1, _cellNumber / 2);
             GenerateMountainRange(Random.Range(1, _cellNumber / 2), Random.Range(6, 11));
-            Debug.Log("Generated at " + Cells[randomIndex2].name);
+            //Debug.Log("Generated at " + Cells[randomIndex2].name);
         }
-        //Debug.Log(_totalMountains);
         for (int i = 0; i < 3; i++) GenerateControl(Random.Range(1, _cellNumber / 2));
         GenerateSpawns(5, -10);
-        //Implement team system
     }
     void GenerateTerrain(HexCell cell)
     {
@@ -126,7 +127,7 @@ public class HexMap : MonoBehaviour
             {
                 if (mountainNumber < 1) return;
                 _totalMountains++;
-                Debug.Log("Generated MT at " + cell);
+                //Debug.Log("Generated MT at " + cell);
                 cell.TerrainType = "Mountain";
                 Cells[_cellNumber - 1 - cell.index].TerrainType = "Mountain";
                 GenerateMountainRange(cell.index, mountainNumber / 2);
@@ -189,6 +190,8 @@ public class HexMap : MonoBehaviour
         HexCell cell = Cells[i] = cellObj.GetComponent<HexCell>();
         //We need to access the instantiated object's class properties.
         cell.Position = new Vector3Int(x, y, -x - y);
+        _cellDictionary[(cell.Position.x, cell.Position.y)] = cell;
+        // Assign cell to dictionary.
         cell.transform.SetParent(transform, false);
         // Unity function to keep cell relative to its' game object
         cell.transform.localPosition = position;
@@ -221,12 +224,9 @@ public class HexMap : MonoBehaviour
 
     public HexCell ReturnHex(int x, int y)
     {
-        for (int i = 0; i < _cellNumber; i++)//3 * size * (size - 1) + 1)
+        if (_cellDictionary.TryGetValue((x, y), out HexCell cell))
         {
-            if (Cells[i].Position.x == x && Cells[i].Position.y == y)
-            {
-                return Cells[i];
-            }
+            return cell;
         }
         return null;
     }
