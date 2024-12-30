@@ -9,11 +9,11 @@ public class EnemyBrain : MonoBehaviour
     public Game Manager;
     private int _economyWeight;
     private int _militaryWeight;
-    public List<List<Enemy>> Groups;
+    public List<List<Unit>> Groups;
     // Groups is a list of lists of enemies.
     private List<HexCell> _currentlyScouting;
     // tandem with ResourceGroup.
-    public List<Enemy> ResourceGroup;
+    public List<Unit> ResourceGroup;
     // ResourceGroup is list of scouts.
 
     //maybe predefine at start and then start Think();
@@ -77,11 +77,11 @@ public class EnemyBrain : MonoBehaviour
         // If # of scouts < max, create one. Otherwise, send them to explore.
         if (ResourceGroup.Count > 0)
         {
-            foreach (Enemy e in ResourceGroup)
-            {
-                if (!e.Moving)
-                { }
-            }
+            //foreach (Unit e in ResourceGroup)
+            //{
+            //    if (!e.Moving)
+            //    { }
+            //}
         }
         else
         {
@@ -92,7 +92,7 @@ public class EnemyBrain : MonoBehaviour
             }
         }
     }
-    private void ScoutVillage(Enemy scout)
+    private void ScoutVillage(Unit scout)
     {
         float minDistance = Mathf.Infinity;
         float d = 0;
@@ -111,6 +111,6 @@ public class EnemyBrain : MonoBehaviour
         if (cell == null) return;
         _currentlyScouting.Clear();
         _currentlyScouting.Add(cell);
-        scout.FollowPath(cell.Position.x, cell.Position.y);
+        scout.MoveTo(cell);
     }
 }

@@ -10,11 +10,10 @@ public class Game : MonoBehaviour
 {
     public int PlayerCoins;
     public int EnemyCoins;
-    public List<Enemy> Enemies = new();
     public HashSet<Unit> Units = new();
     public HashSet<Unit> PlayerUnits = new();
     public HashSet<Unit> EnemyUnits = new();
-
+    //private Dictionary<Unit, int> _unitDictionary = new();
 
     public List<HexCell> PlayerVillages = new();
     public List<HexCell> EnemyVillages = new();
@@ -37,18 +36,7 @@ public class Game : MonoBehaviour
         PlayerSpawn = PlayerSpawnCell.GetComponentInChildren<Spawn>();
         EnemySpawn = EnemySpawnCell.GetComponentInChildren<Spawn>();
     }
-    public Enemy GetEnemy(int id)
-    {
-        if (id == -1) return null;
-        foreach (Enemy enemy in Enemies)
-        {
-            if (enemy.ID == id)
-            {
-                return enemy;
-            }
-        }
-        return null;
-    }
+    
     public HashSet<Unit> RemoveUnit(Unit toRemove)
     {
         if (toRemove != null)

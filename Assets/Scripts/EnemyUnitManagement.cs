@@ -9,7 +9,7 @@ public class EnemyUnitManagement : MonoBehaviour
 {
     // Start is called before the first frame update
     public Game Manager;
-    private List<Enemy> _playerTroops=new();
+    private List<Unit> _playerTroops=new();
     private List<Vector2> _playerTroopPositions = new();
     public GameObject TempRenderObject;
 
@@ -17,10 +17,10 @@ public class EnemyUnitManagement : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            Dictionary<Enemy, List<Enemy>> groups = GetUnitGroups();
-            HashSet<List<Enemy>> processed = new();
+            Dictionary<Unit, List<Unit>> groups = GetUnitGroups();
+            HashSet<List<Unit>> processed = new();
 
-            foreach (KeyValuePair<Enemy, List<Enemy>> pair in groups)
+            foreach (KeyValuePair<Unit, List<Unit>> pair in groups)
             {
                 if (!processed.Contains(pair.Value))
                 {
@@ -31,24 +31,24 @@ public class EnemyUnitManagement : MonoBehaviour
             Debug.Log("DONE");
         }
     }
-    private List<Enemy> CheckPlayerTroops()
+    private List<Unit> CheckPlayerTroops()
     {
-        List<Enemy> playerTroops=new();
-        foreach(Enemy enemy in Manager.Enemies)
+        List<Unit> playerTroops=new();
+        foreach(Unit unit in Manager.Units)
         {
-            if (enemy.OnPlayerTeam == true)
+            if (unit.Team == "Player")
             {
-                if (!enemy) continue;
-                playerTroops.Add(enemy);
+                if (!unit) continue;
+                playerTroops.Add(unit);
             }
         }
         return playerTroops;
     }
     public List<float> GetScores()
     {
-        Dictionary<Enemy, List<Enemy>> enemies = GetUnitGroups();
+        Dictionary<Unit, List<Unit>> enemies = GetUnitGroups();
         List<float> scores=new();
-        foreach(KeyValuePair<Enemy,List<Enemy>> pair in enemies)
+        foreach(KeyValuePair<Unit, List<Unit>> pair in enemies)
         {
             scores.Add((pair.Key.transform.position.y + pair.Value.Count + 14f) * 0.12f);
         }
@@ -56,7 +56,7 @@ public class EnemyUnitManagement : MonoBehaviour
     }
     private void RenderScores()
     {
-        List<Enemy> enemies = CheckPlayerTroops();
+        List<Unit> enemies = CheckPlayerTroops();
         List<float> scores = GetScores();
         for (int i = 0; i < enemies.Count; i++)
         {
@@ -66,21 +66,21 @@ public class EnemyUnitManagement : MonoBehaviour
             render.transform.localScale = new Vector2(scores[i], scores[i]);
         }
     }
-    private Dictionary<Enemy, List<Enemy>> GetUnitGroups()
+    private Dictionary<Unit, List<Unit>> GetUnitGroups()
     {
-        List<Enemy> enemies = CheckPlayerTroops();
-        Dictionary<Enemy, List<Enemy>> enemyDensity = new();
-        HashSet<Enemy> visited = new();
+        List<Unit> enemies = CheckPlayerTroops();
+        Dictionary<Unit, List<Unit>> enemyDensity = new();
+        HashSet<Unit> visited = new();
 
-        foreach (Enemy e in enemies)
+        foreach (Unit e in enemies)
         {
-            List<Enemy> group = new();
+            List<Unit> group = new();
             if (visited.Contains(e)) continue;
-            Queue<Enemy> queue = new();
+            Queue<Unit> queue = new();
             queue.Enqueue(e);
             while (queue.Count > 0)
             {
-                Enemy current = queue.Dequeue();
+                Unit current = queue.Dequeue();
                 if (visited.Contains(current)) continue;
                 visited.Add(current);
                 group.Add(current);
@@ -91,11 +91,11 @@ public class EnemyUnitManagement : MonoBehaviour
                     GameObject enemyObject = hit.gameObject;
                     if (hit.gameObject.CompareTag("Enemy"))
                     {
-                        Enemy enemy = enemyObject.GetComponent<Enemy>();
+                        Unit unit = enemyObject.GetComponent<Unit>();
 
-                        if (enemy.OnPlayerTeam == true && visited.Contains(enemy) == false)
+                        if (unit.Team == "Player" && visited.Contains(unit) == false)
                         {
-                            queue.Enqueue(enemy);
+                            queue.Enqueue(unit);
                         }
                     }
                 }
@@ -103,7 +103,7 @@ public class EnemyUnitManagement : MonoBehaviour
 
             if (group.Count > 0)
             {
-                foreach (Enemy member in group)
+                foreach (Unit member in group)
                 {
                     if (enemyDensity.ContainsKey(member) == false)
                     {
@@ -136,16 +136,16 @@ public class EnemyUnitManagement : MonoBehaviour
         }
         return enemyDensity;
     }
-    private int[] GetNewComposition(List<Enemy> group)
+    private int[] GetNewComposition(List<Unit> group)
     {
         int[] unitValues = new int[] { 0, 0, 0 };
         int[] composition = new int[3];
         //0 is scout, 1 is knight, 2 is archer
         //knight>scout, archer>knight, scout>archer
         Debug.Log(group.Count);
-        foreach (Enemy enemy in group)
+        foreach (Unit u in group)
         {
-            switch (enemy.Type)
+            switch (u.Type)
             {
                 case "Archer":
                     unitValues[2]++;
