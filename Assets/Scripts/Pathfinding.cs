@@ -32,7 +32,7 @@ public class Pathfinding : MonoBehaviour
 
             foreach (HexCell adjacentTile in currentTile.AdjacentTiles)
             {
-                if (adjacentTile == null|| closedPathTiles.Contains(adjacentTile) || adjacentTile.Obstructed || adjacentTile.Occupied)
+                if (adjacentTile == null || closedPathTiles.Contains(adjacentTile) || adjacentTile.Obstructed || adjacentTile.Occupied)
                 {
                     continue;
                 }
@@ -51,8 +51,6 @@ public class Pathfinding : MonoBehaviour
                 }
             }
         }
-
-        return null; // Failure
 
         List<HexCell> GetFinalPath()
         {
@@ -88,7 +86,7 @@ public class Pathfinding : MonoBehaviour
             return finalPathTiles;
         }
 
-
+        return null; // Failure  
     }
 
     protected static int GetEstimatedPathCost(Vector3Int startPosition, Vector3Int targetPosition)

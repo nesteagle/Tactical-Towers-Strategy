@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing.Text;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -20,16 +21,13 @@ public class Unit : MonoBehaviour
     }
     // Health is float of enemy health.
 
-    [SerializeField]
-    public const float Speed = 1f;
+    public float Speed = 1f;
     // Speed is movement speed.
 
-    [SerializeField]
-    public const float AttackDamage = 1f;
+    public float AttackDamage = 1f;
     // AttackDamage is the damage the enemy does per attack.
 
-    [SerializeField]
-    public const float Cooldown = 1f;
+    public float Cooldown = 1f;
     // Cooldown is the total time between attack - 1/3 to charge and 2/3 of waiting cooldown.
 
     public Vector2Int TilePosition;
@@ -56,14 +54,14 @@ public class Unit : MonoBehaviour
     public void MoveTo(int objectiveX, int objectiveY)
     {
         List<HexCell> path = CheckPath(objectiveX, objectiveY);
-        if (State == "Moving" && path != null)
+        if (State == "Rest" && path != null)
         {
-            // coroutine for moving.
+            StartCoroutine(MoveCoroutine(objectiveX, objectiveY));
         }
     }
     private IEnumerator MoveCoroutine(int objectiveX, int objectiveY)
     {
-        while (TilePosition.x != objectiveX && TilePosition.y != objectiveY)
+        while (TilePosition.x != objectiveX || TilePosition.y != objectiveY)
         {
             List<HexCell> path = CheckPath(objectiveX, objectiveY);
             if (path == null)
@@ -71,17 +69,22 @@ public class Unit : MonoBehaviour
                 State = "Rest";
                 yield return new WaitUntil(() => path != null);
             }
-
+            if (path.Count == 1)
+            {
+                State = "Rest";
+                yield break;
+            }
             State = "Moving";
+
             yield return StartCoroutine(MovePosition(transform.localPosition, path[1].transform.localPosition, Speed));
             TilePosition = new Vector2Int(path[1].Position.x, path[1].Position.y);
             path[0].ResetColor();
             path[1].ResetColor();
+            path[0].Occupied = false;
+            path[1].Occupied = true;
         }
-        /// !!!
 
         State = "Rest";
-        yield break;
     }
     private IEnumerator MovePosition(Vector3 pos1, Vector3 pos2, float speed)
     {
@@ -95,10 +98,12 @@ public class Unit : MonoBehaviour
         }
     }
 
-    public Unit HandleDeath()
+    public void HandleDeath()
     {
         // Removes unit from scene, stops any relying functions calling instance.
         // !!!
-        return this;
+        StopAllCoroutines();
+        GameObject.Find("Control").GetComponent<Game>().RemoveUnit(this);
+        Destroy(gameObject);
     }
 }

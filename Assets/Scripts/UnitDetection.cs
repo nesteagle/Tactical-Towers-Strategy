@@ -4,28 +4,25 @@ using UnityEngine;
 
 public class UnitDetection : MonoBehaviour
 {
-    private Enemy _enemy;
-    private Enemy _targetEnemy;
+    private Unit _unit;
+    private Unit _targetUnit;
     private Coroutine _attackRoutine;
-    //private bool _isArcher;
     private void Awake()
     {
-        _enemy = GetComponentInParent<Enemy>();
-        //if (_enemy.Type == "Archer") _isArcher = true;
+        _unit = GetComponentInParent<Unit>();
     }
     private void OnTriggerStay2D(Collider2D collision)
     {
-        if (_enemy.Attacking == true) return;
+        if (_unit.State == "Attacking") return;
         if (!collision.gameObject.CompareTag("Enemy")) return;
-        Enemy enemy = collision.gameObject.GetComponent<Enemy>();
-        if (enemy)//collision.gameObject.GetComponent<Enemy>()
+        Unit target = collision.gameObject.GetComponent<Unit>();
+        if (target)
         {
-            _targetEnemy = enemy;
-            if (_enemy.OnPlayerTeam!=_targetEnemy.OnPlayerTeam)
+            if (_unit.Team != target.Team)
             {
                 //_enemy.StopAllCoroutines(); //maybe add movement check first.
-                _enemy.Attacking = true;
-                _attackRoutine=StartCoroutine(AttackEnemy(_targetEnemy));
+                _unit.State = "Attacking";
+                _attackRoutine=StartCoroutine(AttackUnit(target));
                 return;
             }
         }
@@ -33,30 +30,25 @@ public class UnitDetection : MonoBehaviour
     private void OnTriggerExit2D(Collider2D collision)
     {
         if (!collision.gameObject.CompareTag("Enemy")) return;
-        Enemy enemy = collision.gameObject.GetComponent<Enemy>();
-        if (enemy == _targetEnemy)
+        Unit unit = collision.gameObject.GetComponent<Unit>();
+        if (unit == _targetUnit)
         {
             if (_attackRoutine != null)
             {
                 StopCoroutine(_attackRoutine);
-                _enemy.Attacking = false;
+                unit.State = "Rest";
                 _attackRoutine = null;
             }
         }
     }
-    private IEnumerator AttackEnemy(Enemy targetEnemy)
+    private IEnumerator AttackUnit(Unit target)
     {
-        yield return new WaitForSeconds(_enemy.Cooldown * 1/3f);
-        while (_enemy && targetEnemy.Health > 0)
+        yield return new WaitForSeconds(_unit.Cooldown * 1/3f);
+        while (_unit && target.Health > 0)
         {
-            //if (targetEnemy.Type != "Knight"&&_isArcher==false)
-            //{
-            //    targetEnemy.Health--;
-            //}
-            //else
-            targetEnemy.Health-=_enemy.Damage;
-            yield return new WaitForSeconds(_enemy.Cooldown * 2/3f);//maybe will be attack cooldown.
+            target.Health-= _unit.AttackDamage;
+            yield return new WaitForSeconds(_unit.Cooldown * 2/3f);//maybe will be attack cooldown.
         }
-        if (_enemy) _enemy.Attacking = false;
+        if (_unit) _unit.State = "Rest";
     }
 }

@@ -4,27 +4,27 @@ using UnityEngine;
 
 public class ButtonControl : MonoBehaviour
 {
-    public Spawn Deploy;
+    //public Spawn Deploy;
 
-    private void Start()
-    {
-        StartCoroutine(WaitForLoad());
-    }
+    //private void Awake()
+    //{
+    //    Deploy = Game.PlayerSpawn;
+    //}
     public void PlaceScout()
     {
-        Deploy.PlaceTroop("Scout");
+        Game.PlayerSpawn.PlaceTroop("Scout");
     }
     public void PlaceArcher()
     {
-        Deploy.PlaceTroop("Archer");
+        Game.PlayerSpawn.PlaceTroop("Archer");
     }
     public void PlaceKnight()
     {
-        Deploy.PlaceTroop("Knight");
+        Game.PlayerSpawn.PlaceTroop("Knight");
     }
-    private IEnumerator WaitForLoad()
-    {
-        yield return new WaitForSeconds(0.2f);
-        Deploy = Game.PlayerSpawn;
-    }
+    //private IEnumerator WaitForLoad()
+    //{
+    //    yield return new WaitForSeconds(0.2f);
+    //    Deploy = Game.PlayerSpawn;
+    //}
 }

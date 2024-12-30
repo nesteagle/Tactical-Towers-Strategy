@@ -10,12 +10,12 @@ GameObject:
   m_Component:
   - component: {fileID: 899556667068365615}
   - component: {fileID: 899556667068365614}
-  - component: {fileID: 899556667068365609}
+  - component: {fileID: 7051915095229884969}
   - component: {fileID: -8085479243790237916}
   - component: {fileID: 2714512583496371541}
-  - component: {fileID: 7471756362977832775}
+  - component: {fileID: -6887984668878901242}
   m_Layer: 0
-  m_Name: ScoutUnit
+  m_Name: ArcherUnit
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -78,7 +78,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_Color: {r: 0.21960784, g: 0.71849346, b: 0.8509804, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -88,7 +88,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &899556667068365609
+--- !u!114 &7051915095229884969
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -97,18 +97,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 899556667068365608}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 74af1a954c1097e4b9f501e335bbf67e, type: 3}
+  m_Script: {fileID: 11500000, guid: 23cf8ce238c1cc2439461c317fc0abaa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LocalHealth: 1
-  Speed: 3
-  Position: {x: 0, y: 0}
-  Type: Knight
-  Moving: 0
-  Attacking: 0
-  Cooldown: 0.8
-  Damage: 1
-  OnPlayerTeam: 0
+  LocalHealth: 2
+  Speed: 1.25
+  AttackDamage: 0.5
+  Cooldown: 2.5
+  TilePosition: {x: 0, y: 0}
+  State: Rest
+  Type: Archer
+  Team: 
 --- !u!58 &-8085479243790237916
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -171,7 +170,7 @@ Rigidbody2D:
   m_SleepingMode: 2
   m_CollisionDetection: 0
   m_Constraints: 3
---- !u!114 &7471756362977832775
+--- !u!114 &-6887984668878901242
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -180,8 +179,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 899556667068365608}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d423d8a7231769b4eb339523ac23c02a, type: 3}
+  m_Script: {fileID: 11500000, guid: 1d5678a620a93584eab772c4f97cec40, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SelectingPath: 0
-  PathDrawn: []

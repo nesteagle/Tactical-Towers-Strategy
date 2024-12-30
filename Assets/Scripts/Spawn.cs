@@ -16,11 +16,9 @@ public class Spawn : MonoBehaviour
     private bool _menuOpened;
     public bool IsPlayerSpawn;
     private Game _manager;
-    public Queue<string> Actions = new();
+    public Queue<Unit> Actions = new();
     private int _index;
     private bool _spawning; //make functional eventually
-    private readonly float[] _cooldownTimes = new float[] { 1f, 1.5f, 3f };
-    private readonly int[] _unitCosts = new int[] { 2, 3, 5 };
     private void Start()
     {
         _cell = GetComponentInParent<HexCell>();
@@ -31,16 +29,8 @@ public class Spawn : MonoBehaviour
         StartCoroutine(ManageActions());
         //_deployCanvas = GameObject.Find("UnitDeploy").GetComponent<Canvas>();
     }
-    //private void Update()
-    //{
-    //    if (Input.GetMouseButtonDown(0)){
-    //        if (EventSystem.current.IsPointerOverGameObject()) return;
-    //        Debug.Log("HI this is the spawn you clicked me!");
-    //    }
-    //}
     private void OnMouseDown()
     {
-        Debug.Log("HI this is the spawn you clicked me!");
         if (_menuOpened)
         {
             _menuOpened = false;
@@ -48,8 +38,10 @@ public class Spawn : MonoBehaviour
         }
         else
         {
-            OpenDeployMenu(_cell);
+            DeployMenu.enabled = true;
+            DeployTransform.position = _cell.transform.position + new Vector3(3f, 0);
             _menuOpened = true;
+            // add a method in DeployMenu to close itself.
         }
     }
     private IEnumerator UpdateResources()
@@ -64,94 +56,109 @@ public class Spawn : MonoBehaviour
             else _manager.EnemyCoins++;
         }
     }
-    public void OpenDeployMenu(HexCell cell)
+    public Unit PlaceTroop(string type)
     {
-        DeployMenu.enabled = true;
-        //return button feature to close.
-        DeployTransform.position = cell.transform.position + new Vector3(3f, 0);
-    }
-    private int CheckUnit(string type)
-    {
+        _index++;
+        int cost;
         switch (type)
         {
             case "Scout":
-                return 0;
+                cost = 2;
+                break;
             case "Knight":
-                return 1;
+                cost = 3;
+                break;
             case "Archer":
-                return 2;
+                cost = 5;
+                break;
             default:
-                return -1;
+                cost = int.MaxValue;
+                break;
         }
-    }
-    public int PlaceTroop(string type)
-    {
-        _index++;
         if (IsPlayerSpawn)
         {
-            if (_manager.PlayerCoins < _unitCosts[CheckUnit(type)]) return -1;
-            _manager.PlayerCoins -= _unitCosts[CheckUnit(type)];
+            if (_manager.PlayerCoins < cost) return null;
+            _manager.PlayerCoins -= cost;
         }
-        else if (_manager.EnemyCoins < _unitCosts[CheckUnit(type)]) return -1;
-        _manager.EnemyCoins -= _unitCosts[CheckUnit(type)];
-        //if (_cell.Occupied) yield break;
-        //if (resources<number) return;
-        //all checks will be here.
-        //maybe add method to place on adjacent tiles.
+        else if (_manager.EnemyCoins < cost) return null;
+        _manager.EnemyCoins -= cost;
 
-        string id = type + " " + _index;
-        Actions.Enqueue(id); 
-        return _index;
+        Unit toPlace = SpawnUnit(type, _index);
+        Actions.Enqueue(toPlace);
+        return SpawnUnit(type, _index); //!!!
     }
     private IEnumerator ManageActions()
     {
         while (_manager)//game running
+                        // Add game state.
         {
             if (Actions.Count > 0)
             {
-                string[] splitData = Actions.Peek().Split(" ");
+                Unit toPlace = Actions.Peek();
                 yield return new WaitUntil(() => _cell.Occupied == false);
-                yield return new WaitForSeconds(_cooldownTimes[CheckUnit(splitData[0])]);
+                switch (toPlace.Type)
+                {
+                    case "Scout":
+                        yield return new WaitForSeconds(1f);
+                        break;
+                    case "Knight":
+                        yield return new WaitForSeconds(1.5f);
+                        break;
+                    case "Archer":
+                        yield return new WaitForSeconds(2.5f);
+                        break;
+                    default:
+                        break;
+                }
+                ;
                 //play animation[CheckUnit(Actions.Peek().Split(" ")[0])];
                 //play animation (when made)
-                CreateUnit(_cell, splitData[0], int.Parse(splitData[1]));
+                CreateUnit(toPlace);
                 Actions.Dequeue();
-                //now queue up the training thing
             }
             yield return new WaitForFixedUpdate();
         }
         yield break;
     }
-    public void CreateUnit(HexCell cell, string type, int id)
+    public Unit CreateUnit(Unit toSpawn)
+    {
+        toSpawn.TilePosition = new Vector2Int(_cell.Position.x, _cell.Position.y);
+        Vector3 pos = _cell.transform.position;
+        toSpawn.transform.position = new Vector3(pos.x, pos.y, 0);
+        _cell.Occupied = true;
+        toSpawn.State = "Rest";
+        return toSpawn;
+    }
+    public Unit SpawnUnit(string type, int id)
     {
         GameObject unitObject;
-        Enemy unit = null;
+        Unit unit = null;
         switch (type)
         {
             case "Knight":
                 unitObject = Instantiate(UnitPrefabs[0]);
-                unit = unitObject.GetComponent<Enemy>();
+                unit = unitObject.GetComponent<Unit>();
                 Instantiate(RangeDetectorPrefab[0], unit.transform);
                 break;
             case "Scout":
                 unitObject = Instantiate(UnitPrefabs[1]);
-                unit = unitObject.GetComponent<Enemy>();
+                unit = unitObject.GetComponent<Unit>();
                 Instantiate(RangeDetectorPrefab[0], unit.transform);
                 break;
             case "Archer":
                 unitObject = Instantiate(UnitPrefabs[2]);
-                unit = unitObject.GetComponent<Enemy>();
+                unit = unitObject.GetComponent<Unit>();
                 Instantiate(RangeDetectorPrefab[1], unit.transform);
                 break;
         }
         unit.Type = type;
-        unit.ID = id;
-        unit.Position = new Vector2Int(cell.Position.x, cell.Position.y);
-        Vector3 pos = Game.Map.ReturnHex(unit.Position.x, unit.Position.y).transform.position;
-        unit.transform.position = new Vector3(pos.x, pos.y, 0);
-        unit.OnPlayerTeam = IsPlayerSpawn;
-        cell.Occupied = true;
-        if (IsPlayerSpawn) _manager.PlayerEnemies.Add(unit);
-        else _manager.EnemyEnemies.Add(unit);
+        if (IsPlayerSpawn) unit.Team = "Player";
+        else unit.Team = "Enemy";
+
+        unit.State = "Moving";
+        unit.transform.position = new Vector3(0,-100);
+        
+        _manager.AddUnit(unit);
+        return unit;
     }
 }

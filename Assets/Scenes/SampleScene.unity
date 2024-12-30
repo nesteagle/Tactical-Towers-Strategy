@@ -3054,7 +3054,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4740bb350c37fd847a586c5aa18eaabd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Deploy: {fileID: 0}
 --- !u!1 &516684115
 GameObject:
   m_ObjectHideFlags: 0
@@ -6186,7 +6185,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -32332.94}
+  m_AnchoredPosition: {x: 0, y: -40366.516}
   m_SizeDelta: {x: 240, y: 250}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1067606902
@@ -6940,7 +6939,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1114821641}
   - component: {fileID: 1114821640}
-  - component: {fileID: 1114821642}
   - component: {fileID: 1114821643}
   - component: {fileID: 1114821644}
   - component: {fileID: 1114821645}
@@ -6964,7 +6962,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4740bb350c37fd847a586c5aa18eaabd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Deploy: {fileID: 0}
 --- !u!4 &1114821641
 Transform:
   m_ObjectHideFlags: 0
@@ -6980,18 +6977,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1114821642
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1114821638}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 54f6ada4649d50441adfca4f8b4a2ef4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1114821643
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7010,12 +6995,8 @@ MonoBehaviour:
   PlayerVillages: []
   EnemyVillages: []
   TotalVillages: []
-  PlayerEnemies: []
-  EnemyEnemies: []
   PlayerSpawnCell: {fileID: 0}
   EnemySpawnCell: {fileID: 0}
-  PlayerSpawn: {fileID: 0}
-  EnemySpawn: {fileID: 0}
 --- !u!114 &1114821644
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7823,7 +7804,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1202992188}
   - component: {fileID: 1202992187}
-  - component: {fileID: 1202992189}
   m_Layer: 0
   m_Name: HexGrid
   m_TagString: Untagged
@@ -7863,27 +7843,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1202992189
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1202992186}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 96c84c5d97ebe2d47b82365b6354e5f2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Map: {fileID: 1202992187}
-  troopPrefab:
-  - {fileID: 899556667068365608, guid: 6658526b79795674e9ba7a6a6dca803e, type: 3}
-  - {fileID: 899556667068365608, guid: c9ebb11409ce79d44970013571e8fa91, type: 3}
-  - {fileID: 899556667068365608, guid: 31caf6b776a67de42a768d1f08fd173a, type: 3}
-  TESTOBJECT: {fileID: 5798390801355868431, guid: 05c40e0a5f5e9e740bc761fca81b7f52, type: 3}
-  rangeDetectPrefab:
-  - {fileID: 6657872853836781793, guid: 970194799b1edac4db6da33b07b69136, type: 3}
-  - {fileID: 6657872853836781793, guid: 976dc8d5e14bdd24aad96518d08786e0, type: 3}
 --- !u!1 &1205403697
 GameObject:
   m_ObjectHideFlags: 0
