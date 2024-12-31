@@ -17,7 +17,7 @@ public class EnemyBrain : MonoBehaviour
     public HashSet<Unit> ResourceGroup = new();
     // ResourceGroup is list of scouts.
 
-    private Dictionary<Unit, Village> _villages = new();
+    private Dictionary<Village,Unit> _villages = new();
 
     //maybe predefine at start and then start Think();
     // Update is called once per frame
@@ -49,7 +49,8 @@ public class EnemyBrain : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            StartCoroutine(Think());
+            Expand();
+            //StartCoroutine(Think());
         }
     }
 
@@ -76,16 +77,14 @@ public class EnemyBrain : MonoBehaviour
 
     private void ScoutVillage(Unit unit)
     {
-        // Returns Unit if success, false if failure.
         List<Village> villages = Manager.TotalVillages.OrderBy(v => Mathf.Abs(Vector2.Distance(v.transform.position, unit.transform.position))).ToList();
         foreach (Village v in villages)
         {
             if (v.Control <= -1f || v.Control > 0.9f) continue;
-            if (!_villages.ContainsKey(unit))
-            {
-                _villages.Add(unit, v);
-                unit.MoveTo(v.Cell);
-            }
+            if (_villages.ContainsKey(v)) continue;
+            _villages.Add(v, unit);
+            unit.MoveTo(v.Cell);
+            return;
         }
     }
     private void Expand()
@@ -96,8 +95,14 @@ public class EnemyBrain : MonoBehaviour
             Unit newScout = Game.EnemySpawn.PlaceTroop("Scout");
             ResourceGroup.Add(newScout);
         }
+        foreach(Village v in Manager.TotalVillages) 
+        {
+            if (v.Control <= -1f) _villages.Remove(v);
+        }
         foreach (Unit scout in ResourceGroup)
         {
+            if (_villages.ContainsValue(scout)) continue;
+            Debug.Log(scout.State);
             if (scout.State == "Rest") ScoutVillage(scout);
         }
     }

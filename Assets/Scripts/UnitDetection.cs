@@ -14,7 +14,7 @@ public class UnitDetection : MonoBehaviour
     private void OnTriggerStay2D(Collider2D collision)
     {
         if (_unit.State == "Attacking") return;
-        if (!collision.gameObject.CompareTag("Enemy")) return;
+        if (!collision.gameObject.CompareTag("Unit")) return;
         Unit target = collision.gameObject.GetComponent<Unit>();
         if (target)
         {
@@ -29,7 +29,7 @@ public class UnitDetection : MonoBehaviour
     }
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (!collision.gameObject.CompareTag("Enemy")) return;
+        if (!collision.gameObject.CompareTag("Unit")) return;
         Unit unit = collision.gameObject.GetComponent<Unit>();
         if (unit == _targetUnit)
         {

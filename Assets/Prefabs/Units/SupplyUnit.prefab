@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 899556667068365614}
   - component: {fileID: -8865472314936004977}
   - component: {fileID: -8085479243790237916}
-  - component: {fileID: 2714512583496371541}
   m_Layer: 7
   m_Name: SupplyUnit
   m_TagString: Unit
@@ -77,7 +76,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
-  m_Color: {r: 0.2183442, g: 0.3962264, b: 0.06915272, a: 1}
+  m_Color: {r: 0.84705883, g: 0.75686276, b: 0.6392157, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -99,8 +98,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23cf8ce238c1cc2439461c317fc0abaa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LocalHealth: 2
-  Speed: 1.75
+  LocalHealth: 1
+  Speed: 1.5
   AttackDamage: 0.5
   Cooldown: 1.5
   TilePosition: {x: 0, y: 0}
@@ -142,30 +141,3 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.5
---- !u!50 &2714512583496371541
-Rigidbody2D:
-  serializedVersion: 4
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 899556667068365608}
-  m_BodyType: 0
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 0
-  m_UseAutoMass: 0
-  m_Mass: 0.0001
-  m_LinearDrag: 0
-  m_AngularDrag: 0
-  m_GravityScale: 0
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_Interpolate: 0
-  m_SleepingMode: 2
-  m_CollisionDetection: 0
-  m_Constraints: 3

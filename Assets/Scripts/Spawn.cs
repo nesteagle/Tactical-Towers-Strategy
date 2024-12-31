@@ -85,7 +85,7 @@ public class Spawn : MonoBehaviour
 
         Unit toPlace = SpawnUnit(type, _index);
         Actions.Enqueue(toPlace);
-        return SpawnUnit(type, _index); //!!!
+        return toPlace; //!!!
     }
     private IEnumerator ManageActions()
     {
@@ -113,21 +113,17 @@ public class Spawn : MonoBehaviour
                 ;
                 //play animation[CheckUnit(Actions.Peek().Split(" ")[0])];
                 //play animation (when made)
-                CreateUnit(toPlace);
+                toPlace.TilePosition = new Vector2Int(_cell.Position.x, _cell.Position.y);
+                Vector3 pos = _cell.transform.position;
+                toPlace.transform.position = new Vector3(pos.x, pos.y, 0);
+                _cell.Occupied = true;
+                toPlace.State = "Rest";
+                Debug.Log(toPlace.Team + toPlace.State);
                 Actions.Dequeue();
             }
             yield return new WaitForFixedUpdate();
         }
         yield break;
-    }
-    public Unit CreateUnit(Unit toSpawn)
-    {
-        toSpawn.TilePosition = new Vector2Int(_cell.Position.x, _cell.Position.y);
-        Vector3 pos = _cell.transform.position;
-        toSpawn.transform.position = new Vector3(pos.x, pos.y, 0);
-        _cell.Occupied = true;
-        toSpawn.State = "Rest";
-        return toSpawn;
     }
     public Unit SpawnUnit(string type, int id)
     {
@@ -153,7 +149,10 @@ public class Spawn : MonoBehaviour
         }
         unit.Type = type;
         if (IsPlayerSpawn) unit.Team = "Player";
-        else unit.Team = "Enemy";
+        else { 
+            unit.Team = "Enemy";
+            unit.GetComponent<SelectPath>().enabled = false;
+        }
         unit.State = "Moving";
         unit.transform.position = new Vector3(0, -100);
 

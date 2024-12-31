@@ -13,24 +13,24 @@ public class EnemyUnitManagement : MonoBehaviour
     private List<Vector2> _playerTroopPositions = new();
     public GameObject TempRenderObject;
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            Dictionary<Unit, List<Unit>> groups = GetUnitGroups();
-            HashSet<List<Unit>> processed = new();
+    //private void Update()
+    //{
+    //    if (Input.GetKeyDown(KeyCode.Space))
+    //    {
+    //        Dictionary<Unit, List<Unit>> groups = GetUnitGroups();
+    //        HashSet<List<Unit>> processed = new();
 
-            foreach (KeyValuePair<Unit, List<Unit>> pair in groups)
-            {
-                if (!processed.Contains(pair.Value))
-                {
-                    GetNewComposition(pair.Value);
-                    processed.Add(pair.Value);
-                }
-            }
-            Debug.Log("DONE");
-        }
-    }
+    //        foreach (KeyValuePair<Unit, List<Unit>> pair in groups)
+    //        {
+    //            if (!processed.Contains(pair.Value))
+    //            {
+    //                GetNewComposition(pair.Value);
+    //                processed.Add(pair.Value);
+    //            }
+    //        }
+    //        Debug.Log("DONE");
+    //    }
+    //}
     private List<Unit> CheckPlayerTroops()
     {
         List<Unit> playerTroops = new();
