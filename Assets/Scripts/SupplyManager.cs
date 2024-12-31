@@ -30,13 +30,13 @@ public class SupplyManager : MonoBehaviour
         return unit;
         //StartCoroutine(SupplyVillage(enemy, villageCell, baseCell));
     }
-    private void CheckSupplyPoints(Unit e)
+    private void CheckSupplyPoints(Unit unit)
     {
         foreach (HexCell c in _spawn.AdjacentTiles)
         {
-            if (!_adjacentSpawns.ContainsValue(c) && !_adjacentSpawns.ContainsKey(e))
+            if (!_adjacentSpawns.ContainsValue(c) && !_adjacentSpawns.ContainsKey(unit))
             {
-                _adjacentSpawns.Add(e, c);
+                _adjacentSpawns.Add(unit, c);
             }
         }
     }

@@ -18,6 +18,7 @@ public class SelectPath : MonoBehaviour
     private void Awake()
     {
         _unit = GetComponent<Unit>();
+        if (_unit.Team != "Player") Destroy(this);
     }
 
     private void OnMouseDrag()

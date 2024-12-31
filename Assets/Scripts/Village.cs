@@ -22,7 +22,7 @@ public class Village : MonoBehaviour
         GameObject control = GameObject.Find("Control");
         _supplyManager = control.GetComponent<SupplyManager>();
         _manager = control.GetComponent<Game>();
-        _manager.TotalVillages.Add(Cell);
+        _manager.TotalVillages.Add(this);
         StartCoroutine(UpdateVillage());
     }
     private void OnTriggerEnter2D(Collider2D collision)

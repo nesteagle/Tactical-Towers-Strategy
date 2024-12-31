@@ -173,8 +173,8 @@ public class HexMap : MonoBehaviour
             Manager.EnemySpawnCell = Cells[_cellNumber - 1 - potentialSpawn.index];
             GameObject spawn = Instantiate(SpawnPrefab, potentialSpawn.transform);
             spawn.GetComponent<Spawn>().IsPlayerSpawn = true;
-            spawn = Instantiate(SpawnPrefab, Cells[_cellNumber - 1 - potentialSpawn.index].transform);
-            spawn.GetComponent<Spawn>().IsPlayerSpawn = false;
+            GameObject enemySpawn = Instantiate(SpawnPrefab, Cells[_cellNumber - 1 - potentialSpawn.index].transform);
+            enemySpawn.GetComponent<Spawn>().IsPlayerSpawn = false;
         }
     }
     void CreateCell(int x, int y, int i)

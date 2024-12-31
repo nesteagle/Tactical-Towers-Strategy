@@ -154,7 +154,6 @@ public class Spawn : MonoBehaviour
         unit.Type = type;
         if (IsPlayerSpawn) unit.Team = "Player";
         else unit.Team = "Enemy";
-
         unit.State = "Moving";
         unit.transform.position = new Vector3(0, -100);
 

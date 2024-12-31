@@ -17,10 +17,11 @@ public class Game : MonoBehaviour
 
     public List<HexCell> PlayerVillages = new();
     public List<HexCell> EnemyVillages = new();
-    public List<HexCell> TotalVillages = new();
+    public List<Village> TotalVillages = new();
 
     public HexCell PlayerSpawnCell;
     public HexCell EnemySpawnCell;
+    public EnemyBrain EnemyBrain;
     public static Spawn PlayerSpawn;
     public static Spawn EnemySpawn;
     public static HexMap Map;
@@ -48,8 +49,8 @@ public class Game : MonoBehaviour
             }
             else
             {
+                EnemyBrain.HandleDeath(toRemove);
                 EnemyUnits.Remove(toRemove);
-                // Call event to EnemyBrain
             }
         }
         return Units;
