@@ -107,11 +107,28 @@ public class EnemyBrain : MonoBehaviour
         }
     }
 
+    private void BuildArmy()
+    {
+        // other use of resources - build army to attack player or defend.
+        // PURPOSE: create group to counter player group or attack.
 
+        // check player strength and if existing groups
+        // THEN: If group, make counter group
+        //       if no group, train group of (knights?) to attack
+    }
 
+    private void UpdateGroupPurpose()
+    {
+        // several cases:
+        // evaluate player strength and decide to attack or defend.
+        // evaluate player position and decide next movement.
+        // special cases: 
+        // player near control point
+        // player massing troops in back
 
-
-
+        // Group has State "Attack" "Defend"
+        // Group has HexCell Target - target position
+    }
 
     private void CalculateEconomyWeight()
     {

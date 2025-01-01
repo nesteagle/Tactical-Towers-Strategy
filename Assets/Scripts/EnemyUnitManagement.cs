@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -31,6 +32,64 @@ public class EnemyUnitManagement : MonoBehaviour
     //        Debug.Log("DONE");
     //    }
     //}
+
+    private HashSet<Unit> CalculatePlayerGroups()
+    {
+        // Manager.PlayerUnits
+
+
+
+        return null;
+    }
+
+    private Dictionary<string, List<Unit>> GetUnitDistribution()
+    {
+        List<Unit> enemies = CheckPlayerTroops();
+        Dictionary<string, List<Unit>> zoneDistribution = new()
+    {
+        { "Left", new List<Unit>() },
+        { "Middle", new List<Unit>() },
+        { "Right", new List<Unit>() }
+    };
+        // Directions are oriented to player view.
+
+        float leftBound = -7f * HexData.InnerRadius;
+        float rightBound = 7f * HexData.InnerRadius;
+
+        foreach (Unit unit in enemies)
+        {
+            // Horizontal Zones (Left, Middle, Right)
+            string zone = unit.transform.position.x < leftBound ? "Left" :
+                                    unit.transform.position.x > rightBound ? "Right" : "Middle";
+            string zoneKey = zone;
+            zoneDistribution[zoneKey].Add(unit);
+        }
+
+        return zoneDistribution;
+    }
+
+    private (string State, float Score) EvaluateZone(string zone)
+    {
+        // Zone must be one of: "Left", "Middle", "Right"
+        List<Unit> zoneUnits = GetUnitDistribution()[zone];
+
+        float averageY = 0f;
+        foreach (Unit u in zoneUnits)
+        {
+            float y = u.transform.position.y;
+            if (y > 6 * HexData.InnerRadius)
+            {
+                return  ("DEF", 100f); // change to more creative name; DEF-B currently means enemy incursion.
+            }
+            averageY += y;
+        }
+        if (averageY / zoneUnits.Count <= -12 * HexData.InnerRadius) // CONSTANT !!!
+        {
+            return ("BUILDUP", zoneUnits.Count); // Player is building up troops in the back - likely a strong push.
+        }
+        return ("NORMAL", zoneUnits.Count);
+    }
+
     private List<Unit> CheckPlayerTroops()
     {
         List<Unit> playerTroops = new();
@@ -111,28 +170,6 @@ public class EnemyUnitManagement : MonoBehaviour
                     }
                 }
             }
-            //int count = 0;
-            //Collider2D[] hits = Physics2D.OverlapCircleAll(e.transform.position, HexData.InnerRadius * 4f);
-            //foreach (Collider2D hit in hits)
-            //{
-            //    GameObject enemyObject = hit.gameObject;
-            //    if (hit.gameObject.CompareTag("Enemy"))
-            //    {
-            //        Enemy enemy = enemyObject.GetComponent<Enemy>();
-
-            //        if (enemy.OnPlayerTeam == true)
-            //        {
-            //            if (collided.Contains(enemy) == false)
-            //            {
-            //                collided.Add(enemy);
-            //                count++;
-            //            }
-            //        }
-            //    }
-            //}
-            //if (count == 0) continue;
-            //enemyDensity.Add(e, count);
-
         }
         return enemyDensity;
     }
