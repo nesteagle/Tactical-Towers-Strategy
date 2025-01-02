@@ -14,15 +14,16 @@ public class SelectPath : MonoBehaviour
     private Unit _unit;
     private List<HexCell> _pathToClear = new();
     HexCell _targetCell;
+    private bool _enabled = false;
 
     private void Awake()
     {
-        _unit = GetComponent<Unit>();
+        StartCoroutine(WaitForUnitLoad());
     }
 
     private void OnMouseDrag()
     {
-        if (_unit.State != "Rest") return;
+        if (_unit.State != "Rest" || !_enabled) return;
         RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
         if (hit.collider == null) return;
 
@@ -52,7 +53,7 @@ public class SelectPath : MonoBehaviour
 
     private void OnMouseUp()
     {
-        if (_targetCell == null) return;
+        if (_targetCell == null || !_enabled) return;
         _unit.MoveTo(_targetCell);
         StartCoroutine(ClearOnRest());
     }
@@ -70,5 +71,17 @@ public class SelectPath : MonoBehaviour
     {
         yield return new WaitUntil(() => _unit.State == "Rest");
         ClearPath(_pathToClear);
+    }
+
+    private IEnumerator WaitForUnitLoad()
+    {
+        yield return new WaitUntil(() => TryGetComponent(out Unit unit));
+        if (TryGetComponent(out Unit unit))
+            _unit = unit;
+        if (unit.Team == "Player")
+        {
+            _enabled = true;
+        }
+        else _enabled = false;
     }
 }

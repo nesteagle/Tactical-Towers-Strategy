@@ -42,6 +42,8 @@ public class Game : MonoBehaviour
     {
         yield return new WaitUntil(() => GameObject.Find("HexGrid").GetComponent<HexMap>() != null);
         Map = GameObject.Find("HexGrid").GetComponent<HexMap>();
+        yield return StartCoroutine(Map.GenerateGrid(0, 0));
+        yield return StartCoroutine(Map.GenerateMap());
         PlayerSpawn = PlayerSpawnCell.GetComponentInChildren<Spawn>();
         EnemySpawn = EnemySpawnCell.GetComponentInChildren<Spawn>();
     }

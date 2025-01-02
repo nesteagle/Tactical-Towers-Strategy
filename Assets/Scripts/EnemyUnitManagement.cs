@@ -58,15 +58,15 @@ public class EnemyUnitManagement : MonoBehaviour
         int archerCount = Mathf.FloorToInt(composition.Knights / archerToKnightRatio);
         int knightCount = Mathf.FloorToInt(composition.Knights * knightMultiplier);
         int scoutCount = Mathf.FloorToInt(composition.Archers * scoutMultiplier);
-
-        if (composition.Scouts >= 2)
-        {
-            knightCount += Mathf.FloorToInt(composition.Scouts * knightMultiplier);
-        }
-        else
-        {
-            scoutCount += composition.Scouts;
-        }
+        knightCount += composition.Scouts;
+        //if (composition.Scouts >= 2)
+        //{
+        //    knightCount += Mathf.FloorToInt(composition.Scouts * knightMultiplier);
+        //}
+        //else
+        //{
+        //    scoutCount += composition.Scouts;
+        //}
         return new Composition(scoutCount, knightCount, archerCount);
     }
     public Queue<string> CompositionToUnitQueue(Composition comp)
@@ -88,8 +88,9 @@ public class EnemyUnitManagement : MonoBehaviour
     }
     public Composition GetMissingComposition(List<Unit> currentComposition, List<Unit> totalComposition)
     {
-        Composition total = GroupToComposition(totalComposition);
+        Composition total = GetNewComposition(totalComposition);
         Composition curr = GroupToComposition(currentComposition);
+        Debug.Log($"Total: {total.Scouts} scouts, {total.Knights} knights, {total.Archers} archers.");
         return new Composition(total.Scouts - curr.Scouts, total.Knights - curr.Knights, total.Archers - curr.Archers);
     }
 }

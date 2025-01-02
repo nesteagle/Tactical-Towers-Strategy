@@ -61,8 +61,8 @@ public class EnemyBrain : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            Expand();
-            //BuildArmy();
+            //Expand();
+            BuildArmy();
             //StartCoroutine(Think());
         }
     }
@@ -122,16 +122,19 @@ public class EnemyBrain : MonoBehaviour
 
     private void BuildArmy()
     {
+        playerZoneUnits = GetUnitDistribution("Player");
+        enemyZoneUnits = GetUnitDistribution("Enemy");
+
         if (Manager.PlayerUnits.Count == 0) // Attack threshold
         {
+            Debug.Log("CASE WEAK");
             if (Manager.EnemyCoins > 0) // and rateofgrowth > ? !!!
             {
                 Unit newAttacker = Game.EnemySpawn.PlaceTroop("Knight"); // !!!
                 // do by zone
             }
         }
-
-        if (playerZoneUnits.Count > enemyZoneUnits.Count)
+        if (Manager.PlayerUnits.Count > Manager.EnemyUnits.Count-ResourceGroup.Count)
         {
             int midCount = enemyZoneUnits["Middle"].Count;
             int plrMidCount = playerZoneUnits["Middle"].Count;
@@ -145,50 +148,61 @@ public class EnemyBrain : MonoBehaviour
             int plrRightCount = playerZoneUnits["Right"].Count;
             int rightDiff = plrRightCount - rightCount;
 
-            int urgency = Mathf.Max(midDiff, rightDiff, leftDiff);
-
             switch (_defensePriority)
             {
                 case null:
+                    Debug.Log("null, initializing def_pri");
                     _defensePriority = midDiff > leftDiff ? midDiff > rightDiff ? "Middle" : "Right" : leftDiff > rightDiff ? "Left" : "Right";
                     break;
                 case "Left":
+                    Debug.Log(leftDiff);
                     if (leftDiff <= 0)
                     {
+                        Debug.Log("left neutralized.");
                         _defensePriority = rightDiff > midDiff ? "Right" : "Middle";
                     }
-                    else if (leftCount == 0 || 2 * plrLeftCount > 3 * leftCount)
+                    else if (2 * plrLeftCount > 3 * leftCount)
                     {
                         Composition missing = UnitManagement.GetMissingComposition(enemyZoneUnits["Left"], playerZoneUnits["Left"]);
                         _unitQueue = UnitManagement.CompositionToUnitQueue(missing);
                     }
                     break;
                 case "Right":
+                    Debug.Log(rightDiff);
                     if (rightDiff <= 0)
                     {
+                        Debug.Log("right neutralized.");
                         _defensePriority = leftDiff > midDiff ? "Left" : "Middle";
                     }
-                    else if (midCount == 0 || 2 * plrMidCount > 3 * midCount)
-                    {
-                        Composition missing = UnitManagement.GetMissingComposition(enemyZoneUnits["Middle"], playerZoneUnits["Middle"]);
-                        _unitQueue = UnitManagement.CompositionToUnitQueue(missing);
-                    }
-                    break;
-                case "Middle":
-                    if (midDiff <= 0) // maybe -1 for outnumbering? consider when testing !!!
-                    {
-                        _defensePriority = leftDiff > rightDiff ? "Left" : "Right";
-                    }
-                    else if (rightCount == 0 || 2 * plrRightCount > 3 * rightCount)
+                    else if (2 * plrRightCount > 3 * rightCount)
                     {
                         Composition missing = UnitManagement.GetMissingComposition(enemyZoneUnits["Right"], playerZoneUnits["Right"]);
                         _unitQueue = UnitManagement.CompositionToUnitQueue(missing);
                     }
                     break;
+                case "Middle":
+                    Debug.Log(midDiff);
+                    if (midDiff <= 0) // maybe -1 for outnumbering? consider when testing !!!
+                    {
+                        Debug.Log("mid neutralized.");
+                        _defensePriority = leftDiff > rightDiff ? "Left" : "Right";
+                    }
+                    else if (2 * plrMidCount > 3 * midCount)
+                    {
+                        Composition missing = UnitManagement.GetMissingComposition(enemyZoneUnits["Middle"], playerZoneUnits["Middle"]);
+                        _unitQueue = UnitManagement.CompositionToUnitQueue(missing);
+                    }
+                    break;
             }
-            Unit unit = Game.EnemySpawn.PlaceTroop(_unitQueue.Peek());
-            StartCoroutine(MoveWhenSpawned(unit)); // MoveUnitOffZone
-            _unitQueue.Dequeue();
+            Debug.Log(_defensePriority);
+
+            if (_unitQueue.Count > 0)
+            {
+                Debug.Log(_unitQueue.Peek());
+                Unit unit = Game.EnemySpawn.PlaceTroop(_unitQueue.Peek());
+                StartCoroutine(MoveWhenSpawned(unit)); // MoveUnitOffZone
+                _unitQueue.Dequeue();
+            }
         }
         // WEIGH MOST IMPORTANT SECTIONS and defend 2/3 of them.
 

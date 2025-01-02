@@ -43,13 +43,13 @@ public class HexMap : MonoBehaviour
         // this function gets the # of hexagons per n rings
         // n=1 returns 1, n=2 returns 7, etc.
         Cells = new HexCell[_cellNumber];
-        GenerateGrid(0, 0);
-        GenerateMap();
+
     }
-    void GenerateGrid(int centerX, int centerY)
+    public IEnumerator GenerateGrid(int centerX, int centerY)
     {
         GenerateCells(centerX, centerY);
         GenerateAdjacentTiles();
+        yield break;
     }
 
     void GenerateCells(int centerX, int centerY)
@@ -96,7 +96,7 @@ public class HexMap : MonoBehaviour
             }
         }
     }
-    void GenerateMap()
+    public IEnumerator GenerateMap()
     {
         int randomIndex = RandomCentralCell(_cellNumber / 2);
 
@@ -107,11 +107,12 @@ public class HexMap : MonoBehaviour
         }
         for (int i = 0; i < Random.Range(0, 3); i++)
         {
-            GenerateMountainRange(Random.Range(0, _cellNumber / 2), 8);
+            GenerateMountainRange(Random.Range(1, _cellNumber / 2), 8);
             Debug.Log("Generated range");
         }
-        for (int i = 0; i < 3; i++) GenerateControl(Random.Range(0, _cellNumber / 3));
         GenerateSpawns(5, -10);
+        for (int i = 0; i < 3; i++) GenerateControl(Random.Range(1, _cellNumber / 3));
+        yield break;
     }
     void GenerateTerrain(HexCell cell)
     {
@@ -161,7 +162,7 @@ public class HexMap : MonoBehaviour
 
             foreach (HexCell adjacentCell in cell.AdjacentTiles)
             {
-                if (adjacentCell && adjacentCell.TerrainType != "Mountain" && Random.Range(0, 100) < 34)
+                if (adjacentCell && adjacentCell.TerrainType != "Mountain" && Random.Range(1, 100) < 34)
                 {
                     mountainNumber--;
                     queue.Enqueue(adjacentCell);
@@ -169,12 +170,30 @@ public class HexMap : MonoBehaviour
             }
         }
     }
-    void GenerateControl(int index)
+    private void GenerateControl(int index)
     {
         int symmetricalIndex = _cellNumber - 1 - index;
-        if (Cells[index] == null || Cells[index].AdjacentTiles.All(cell => cell.TerrainType == "Mountain" || cell.TerrainType == "Forest"))
+
+        int count = 0;
+        foreach (HexCell cell in Cells[index].AdjacentTiles)
         {
-            GenerateControl(Random.Range(0, _cellNumber / 3));
+            if (null == cell)
+            {
+                Debug.Log("null cell");
+            }
+            else
+                Debug.Log(cell.name);
+            if (cell == null || cell.TerrainType == "Spawn" || cell.TerrainType == "Control")
+            {
+                GenerateControl(Random.Range(1, _cellNumber / 2));
+                return;
+            }
+            else if (cell.TerrainType == "Mountain") count++;
+        }
+        if (count > Cells[index].AdjacentTiles.Count - 3)
+        {
+            GenerateControl(Random.Range(1, _cellNumber / 2));
+            return;
         }
         else
         {
@@ -187,30 +206,29 @@ public class HexMap : MonoBehaviour
     void GenerateSpawns(int x, int y)
     {
         HexCell potentialSpawn = ReturnHex(x, y);
-        bool isOccupied = false;
+        //bool isOccupied = false;
         foreach (HexCell cell in potentialSpawn.AdjacentTiles)
         {
-            if (cell.TerrainType == "Mountain" || cell.TerrainType == "Control")
+            while (cell.TerrainType == "Mountain")
             {
-                isOccupied = true;
+                GenerateTerrain(cell);
             }
-
         }
-        if (isOccupied)
-        {
-            GenerateSpawns(Random.Range(3, 7), Random.Range(-11, -9));
-        }
-        else
-        {
-            potentialSpawn.TerrainType = "Spawn";
-            Cells[_cellNumber - 1 - potentialSpawn.index].TerrainType = "Spawn";
-            Manager.PlayerSpawnCell = potentialSpawn;
-            Manager.EnemySpawnCell = Cells[_cellNumber - 1 - potentialSpawn.index];
-            GameObject spawn = Instantiate(SpawnPrefab, potentialSpawn.transform);
-            spawn.GetComponent<Spawn>().IsPlayerSpawn = true;
-            GameObject enemySpawn = Instantiate(SpawnPrefab, Cells[_cellNumber - 1 - potentialSpawn.index].transform);
-            enemySpawn.GetComponent<Spawn>().IsPlayerSpawn = false;
-        }
+        //if (isOccupied)
+        //{
+        //    GenerateSpawns(Random.Range(2, 8), Random.Range(-11, -9));
+        //}
+        //else
+        //{
+        potentialSpawn.TerrainType = "Spawn";
+        Cells[_cellNumber - 1 - potentialSpawn.index].TerrainType = "Spawn";
+        Manager.PlayerSpawnCell = potentialSpawn;
+        Manager.EnemySpawnCell = Cells[_cellNumber - 1 - potentialSpawn.index];
+        GameObject spawn = Instantiate(SpawnPrefab, potentialSpawn.transform);
+        spawn.GetComponent<Spawn>().IsPlayerSpawn = true;
+        GameObject enemySpawn = Instantiate(SpawnPrefab, Cells[_cellNumber - 1 - potentialSpawn.index].transform);
+        enemySpawn.GetComponent<Spawn>().IsPlayerSpawn = false;
+        //}
     }
     void CreateCell(int x, int y, int i)
     {
