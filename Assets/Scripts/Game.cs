@@ -21,6 +21,14 @@ public class Game : MonoBehaviour
 
     public HexCell PlayerSpawnCell;
     public HexCell EnemySpawnCell;
+    public Vector2Int EnemySpawnPos
+    {
+        get
+        {
+            return new Vector2Int(EnemySpawnCell.Position.x, EnemySpawnCell.Position.y);
+        }
+    }
+
     public EnemyBrain EnemyBrain;
     public static Spawn PlayerSpawn;
     public static Spawn EnemySpawn;

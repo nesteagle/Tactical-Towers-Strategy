@@ -172,7 +172,7 @@ public class HexMap : MonoBehaviour
     void GenerateControl(int index)
     {
         int symmetricalIndex = _cellNumber - 1 - index;
-        if (Cells[index] == null || Cells[index].AdjacentTiles.All(cell => cell.TerrainType == "Mountain"))
+        if (Cells[index] == null || Cells[index].AdjacentTiles.All(cell => cell.TerrainType == "Mountain" || cell.TerrainType == "Forest"))
         {
             GenerateControl(Random.Range(0, _cellNumber / 3));
         }

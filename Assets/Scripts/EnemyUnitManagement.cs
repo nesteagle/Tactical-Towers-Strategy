@@ -24,57 +24,6 @@ public class EnemyUnitManagement : MonoBehaviour
     private List<Vector2> _playerTroopPositions = new();
     public GameObject TempRenderObject;
 
-    public Dictionary<string, List<Unit>> GetUnitDistribution(string team)
-    {
-        Dictionary<string, List<Unit>> zoneDistribution = new()
-    {
-        { "Left", new List<Unit>() },
-        { "Middle", new List<Unit>() },
-        { "Right", new List<Unit>() }
-    };
-        // Directions are oriented to player view.
-
-        float leftBound = -7f * HexData.InnerRadius;
-        float rightBound = 7f * HexData.InnerRadius;
-
-        foreach (Unit unit in team == "Player" ? Manager.PlayerUnits : Manager.EnemyUnits)
-        {
-            // if () continue; // if ResourceGroup?
-
-            // Horizontal Zones (Left, Middle, Right)
-            string zone = unit.transform.position.x < leftBound ? "Left" :
-                                    unit.transform.position.x > rightBound ? "Right" : "Middle";
-            string zoneKey = zone;
-            zoneDistribution[zoneKey].Add(unit);
-        }
-
-        return zoneDistribution;
-    }
-
-    public (string State, float Score) EvaluateZone(string zone)
-    {
-        // Zone must be one of: "Left", "Middle", "Right"
-        List<Unit> playerZoneUnits = GetUnitDistribution("Player")[zone];
-        List<Unit> enemyZoneUnits = GetUnitDistribution("Enemy")[zone];
-
-        float averageY = 0f;
-        if (playerZoneUnits.Count == 0 || enemyZoneUnits.Count / playerZoneUnits.Count > 3) return ("ATTACK", 5f); // adjust weight system?
-        foreach (Unit u in playerZoneUnits)
-        {
-            float y = u.transform.position.y;
-            if (y > 6 * HexData.InnerRadius)
-            {
-                return ("DEFEND", 100f); // change to more creative name - currently representing enemy incursion
-            }
-            averageY += y;
-        }
-        if (averageY / playerZoneUnits.Count <= -12 * HexData.InnerRadius) // CONSTANT !!!
-        {
-            return ("BUILDUP", playerZoneUnits.Count); // Player is building up troops in the back.
-        }
-        return ("NORMAL", playerZoneUnits.Count);
-    }
-
     public Composition GroupToComposition(List<Unit> group)
     {
         int scoutCount = 0;
@@ -119,6 +68,23 @@ public class EnemyUnitManagement : MonoBehaviour
             scoutCount += composition.Scouts;
         }
         return new Composition(scoutCount, knightCount, archerCount);
+    }
+    public Queue<string> CompositionToUnitQueue(Composition comp)
+    {
+        Queue<string> unitQueue = new();
+        for (int i = 0; i < comp.Knights; i++)
+        {
+            unitQueue.Enqueue("Knight");
+        };
+        for (int i = 0; i < comp.Scouts; i++)
+        {
+            unitQueue.Enqueue("Scout");
+        };
+        for (int i = 0; i < comp.Archers; i++)
+        {
+            unitQueue.Enqueue("Archer");
+        };
+        return unitQueue;
     }
     public Composition GetMissingComposition(List<Unit> currentComposition, List<Unit> totalComposition)
     {
