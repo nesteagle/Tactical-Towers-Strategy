@@ -14,37 +14,8 @@ public class EnemyUnitManagement : MonoBehaviour
     private List<Vector2> _playerTroopPositions = new();
     public GameObject TempRenderObject;
 
-    //private void Update()
-    //{
-    //    if (Input.GetKeyDown(KeyCode.Space))
-    //    {
-    //        Dictionary<Unit, List<Unit>> groups = GetUnitGroups();
-    //        HashSet<List<Unit>> processed = new();
-
-    //        foreach (KeyValuePair<Unit, List<Unit>> pair in groups)
-    //        {
-    //            if (!processed.Contains(pair.Value))
-    //            {
-    //                GetNewComposition(pair.Value);
-    //                processed.Add(pair.Value);
-    //            }
-    //        }
-    //        Debug.Log("DONE");
-    //    }
-    //}
-
-    private HashSet<Unit> CalculatePlayerGroups()
+    public Dictionary<string, List<Unit>> GetUnitDistribution(string team)
     {
-        // Manager.PlayerUnits
-
-
-
-        return null;
-    }
-
-    private Dictionary<string, List<Unit>> GetUnitDistribution()
-    {
-        List<Unit> enemies = CheckPlayerTroops();
         Dictionary<string, List<Unit>> zoneDistribution = new()
     {
         { "Left", new List<Unit>() },
@@ -56,7 +27,7 @@ public class EnemyUnitManagement : MonoBehaviour
         float leftBound = -7f * HexData.InnerRadius;
         float rightBound = 7f * HexData.InnerRadius;
 
-        foreach (Unit unit in enemies)
+        foreach (Unit unit in team == "Player" ? Manager.PlayerUnits: Manager.EnemyUnits)
         {
             // Horizontal Zones (Left, Middle, Right)
             string zone = unit.transform.position.x < leftBound ? "Left" :
@@ -71,108 +42,27 @@ public class EnemyUnitManagement : MonoBehaviour
     private (string State, float Score) EvaluateZone(string zone)
     {
         // Zone must be one of: "Left", "Middle", "Right"
-        List<Unit> zoneUnits = GetUnitDistribution()[zone];
+        List<Unit> playerZoneUnits = GetUnitDistribution("Player")[zone];
+        List<Unit> enemyZoneUnits = GetUnitDistribution("Enemy")[zone];
 
         float averageY = 0f;
-        foreach (Unit u in zoneUnits)
+        if (playerZoneUnits.Count == 0 || enemyZoneUnits.Count / playerZoneUnits.Count > 3) return ("ATTACK", 5f); // adjust weight system?
+        foreach (Unit u in playerZoneUnits)
         {
             float y = u.transform.position.y;
             if (y > 6 * HexData.InnerRadius)
             {
-                return  ("DEF", 100f); // change to more creative name; DEF-B currently means enemy incursion.
+                return ("DEF", 100f); // change to more creative name; DEF-B currently means enemy incursion.
             }
             averageY += y;
         }
-        if (averageY / zoneUnits.Count <= -12 * HexData.InnerRadius) // CONSTANT !!!
+        if (averageY / playerZoneUnits.Count <= -12 * HexData.InnerRadius) // CONSTANT !!!
         {
-            return ("BUILDUP", zoneUnits.Count); // Player is building up troops in the back - likely a strong push.
+            return ("BUILDUP", playerZoneUnits.Count); // Player is building up troops in the back.
         }
-        return ("NORMAL", zoneUnits.Count);
+        return ("NORMAL", playerZoneUnits.Count);
     }
 
-    private List<Unit> CheckPlayerTroops()
-    {
-        List<Unit> playerTroops = new();
-        foreach (Unit unit in Manager.Units)
-        {
-            if (unit.Team == "Player")
-            {
-                if (!unit) continue;
-                playerTroops.Add(unit);
-            }
-        }
-        return playerTroops;
-    }
-    public List<float> GetScores()
-    {
-        Dictionary<Unit, List<Unit>> enemies = GetUnitGroups();
-        List<float> scores = new();
-        foreach (KeyValuePair<Unit, List<Unit>> pair in enemies)
-        {
-            scores.Add((pair.Key.transform.position.y + pair.Value.Count + 14f) * 0.12f);
-        }
-        return scores;
-    }
-    private void RenderScores()
-    {
-        List<Unit> enemies = CheckPlayerTroops();
-        List<float> scores = GetScores();
-        for (int i = 0; i < enemies.Count; i++)
-        {
-            Debug.Log(scores[i]);
-            GameObject render = Instantiate(TempRenderObject);
-            render.transform.position = enemies[i].transform.position;
-            render.transform.localScale = new Vector2(scores[i], scores[i]);
-        }
-    }
-    private Dictionary<Unit, List<Unit>> GetUnitGroups()
-    {
-        List<Unit> enemies = CheckPlayerTroops();
-        Dictionary<Unit, List<Unit>> enemyDensity = new();
-        HashSet<Unit> visited = new();
-
-        foreach (Unit e in enemies)
-        {
-            List<Unit> group = new();
-            if (visited.Contains(e)) continue;
-            Queue<Unit> queue = new();
-            queue.Enqueue(e);
-            while (queue.Count > 0)
-            {
-                Unit current = queue.Dequeue();
-                if (visited.Contains(current)) continue;
-                visited.Add(current);
-                group.Add(current);
-
-                Collider2D[] hits = Physics2D.OverlapCircleAll(current.transform.position, HexData.InnerRadius * 3f);
-                foreach (Collider2D hit in hits)
-                {
-                    GameObject enemyObject = hit.gameObject;
-                    if (hit.gameObject.CompareTag("Enemy"))
-                    {
-                        Unit unit = enemyObject.GetComponent<Unit>();
-
-                        if (unit.Team == "Player" && visited.Contains(unit) == false)
-                        {
-                            queue.Enqueue(unit);
-                        }
-                    }
-                }
-            }
-
-            if (group.Count > 0)
-            {
-                foreach (Unit member in group)
-                {
-                    if (enemyDensity.ContainsKey(member) == false)
-                    {
-                        enemyDensity[member] = group;
-                    }
-                }
-            }
-        }
-        return enemyDensity;
-    }
     private int[] GetNewComposition(List<Unit> group)
     {
         int[] unitValues = new int[] { 0, 0, 0 };
