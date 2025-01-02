@@ -121,6 +121,7 @@ public class EnemyBrain : MonoBehaviour
             if (Manager.EnemyCoins > 0) // and rateofgrowth > ? !!!
             {
                 Unit newAttacker = Game.EnemySpawn.PlaceTroop("Knight"); // !!!
+                // do by zone
             }
         }
 
@@ -129,6 +130,7 @@ public class EnemyBrain : MonoBehaviour
 
             if (playerZoneUnits["Middle"].Count / enemyZoneUnits["Middle"].Count > 1.5f)
             {
+                Composition missing = UnitManagement.GetMissingComposition(enemyZoneUnits["Middle"], playerZoneUnits["Middle"]);
                 // get missing composition units and train.
             }
             else if (playerZoneUnits["Left"].Count / enemyZoneUnits["Left"].Count > 1.5f)

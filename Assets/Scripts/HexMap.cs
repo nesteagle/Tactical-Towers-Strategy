@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 public static class HexData
 {
@@ -47,6 +48,12 @@ public class HexMap : MonoBehaviour
     }
     void GenerateGrid(int centerX, int centerY)
     {
+        GenerateCells(centerX, centerY);
+        GenerateAdjacentTiles();
+    }
+
+    void GenerateCells(int centerX, int centerY)
+    {
         for (int column = -_size + 1, i = 0; column < _size; column++)
         {
             int smaller = Mathf.Max(-_size + 1, -column - _size + 1);
@@ -59,16 +66,33 @@ public class HexMap : MonoBehaviour
                 CreateCell(x, y, i++);
             }
         }
-        for (int column = -_size + 1, j = 0; column < _size; column++)
-        {
-            int smaller = Mathf.Max(-_size + 1, -column - _size + 1);
-            int larger = Mathf.Min(_size - 1, -column + _size - 1);
+    }
 
-            for (int row = smaller; row <= larger; row++)
+    void GenerateAdjacentTiles()
+    {
+        for (int i = 0; i < _cellNumber; i++)
+        {
+            HexCell cell = Cells[i];
+            int x = cell.Position.x;
+            int y = cell.Position.y;
+
+            if (y % 2 == 0)
             {
-                int x = centerX - column;
-                int y = centerY - row;
-                AddAdjacent(x, y, j++);
+                cell.AdjacentTiles.Add(ReturnHex(x + 1, y - 1));
+                cell.AdjacentTiles.Add(ReturnHex(x, y - 1));
+                cell.AdjacentTiles.Add(ReturnHex(x - 1, y));
+                cell.AdjacentTiles.Add(ReturnHex(x + 1, y));
+                cell.AdjacentTiles.Add(ReturnHex(x, y + 1));
+                cell.AdjacentTiles.Add(ReturnHex(x - 1, y + 1));
+            }
+            else
+            {
+                cell.AdjacentTiles.Add(ReturnHex(x, y - 1));
+                cell.AdjacentTiles.Add(ReturnHex(x + 1, y - 1));
+                cell.AdjacentTiles.Add(ReturnHex(x + 1, y));
+                cell.AdjacentTiles.Add(ReturnHex(x - 1, y));
+                cell.AdjacentTiles.Add(ReturnHex(x - 1, y + 1));
+                cell.AdjacentTiles.Add(ReturnHex(x, y + 1));
             }
         }
     }
@@ -81,13 +105,12 @@ public class HexMap : MonoBehaviour
             int symmetricalIndex = _cellNumber - 1 - i;
             GenerateTerrain(Cells[i]);
         }
-        for (int i = 0; i < Random.Range(1, 4); i++)
+        for (int i = 0; i < Random.Range(0, 3); i++)
         {
-            int randomIndex2 = Random.Range(1, _cellNumber / 2);
-            GenerateMountainRange(Random.Range(1, _cellNumber / 2), Random.Range(6, 11));
-            //Debug.Log("Generated at " + Cells[randomIndex2].name);
+            GenerateMountainRange(Random.Range(0, _cellNumber / 2), 8);
+            Debug.Log("Generated range");
         }
-        for (int i = 0; i < 3; i++) GenerateControl(Random.Range(1, _cellNumber / 2));
+        for (int i = 0; i < 3; i++) GenerateControl(Random.Range(0, _cellNumber / 3));
         GenerateSpawns(5, -10);
     }
     void GenerateTerrain(HexCell cell)
@@ -119,27 +142,39 @@ public class HexMap : MonoBehaviour
     }
     void GenerateMountainRange(int index, int mountainNumber)
     {
-        foreach (HexCell cell in Cells[index].AdjacentTiles)
+        Queue<HexCell> queue = new Queue<HexCell>();
+        queue.Enqueue(Cells[index]);
+
+        while (queue.Count > 0)
         {
-            if (!cell) continue;
-            if (cell.TerrainType == "Mountain") continue;
-            if (Random.Range(0, 3) == 0)
+            HexCell cell = queue.Dequeue();
+
+            if (cell.TerrainType == "Mountain")
+                continue;
+
+            if (mountainNumber < 1)
+                return;
+
+            _totalMountains++;
+            cell.TerrainType = "Mountain";
+            Cells[_cellNumber - 1 - cell.index].TerrainType = "Mountain";
+
+            foreach (HexCell adjacentCell in cell.AdjacentTiles)
             {
-                if (mountainNumber < 1) return;
-                _totalMountains++;
-                //Debug.Log("Generated MT at " + cell);
-                cell.TerrainType = "Mountain";
-                Cells[_cellNumber - 1 - cell.index].TerrainType = "Mountain";
-                GenerateMountainRange(cell.index, mountainNumber / 2);
+                if (adjacentCell && adjacentCell.TerrainType != "Mountain" && Random.Range(0, 100) < 34)
+                {
+                    mountainNumber--;
+                    queue.Enqueue(adjacentCell);
+                }
             }
         }
     }
     void GenerateControl(int index)
     {
         int symmetricalIndex = _cellNumber - 1 - index;
-        if (Cells[index].TerrainType == "Forest" || Cells[index].TerrainType == "Mountain")
+        if (Cells[index] == null || Cells[index].AdjacentTiles.All(cell => cell.TerrainType == "Mountain"))
         {
-            GenerateControl(Random.Range(1, _cellNumber / 2));
+            GenerateControl(Random.Range(0, _cellNumber / 3));
         }
         else
         {
@@ -163,7 +198,7 @@ public class HexMap : MonoBehaviour
         }
         if (isOccupied)
         {
-            GenerateSpawns(Random.Range(0, 10), Random.Range(-11, -6));
+            GenerateSpawns(Random.Range(3, 7), Random.Range(-11, -9));
         }
         else
         {
@@ -198,28 +233,6 @@ public class HexMap : MonoBehaviour
         cell.name = new Vector2Int(x, y).ToString();
         // A debug measure: simple way to see which cell is which.
         cell.index = i;
-    }
-    void AddAdjacent(int x, int y, int i)
-    {
-        HexCell cell = Cells[i];
-        if (y % 2 == 0)
-        {
-            cell.AdjacentTiles.Add(ReturnHex(x + 1, y - 1));
-            cell.AdjacentTiles.Add(ReturnHex(x, y - 1));
-            cell.AdjacentTiles.Add(ReturnHex(x - 1, y));
-            cell.AdjacentTiles.Add(ReturnHex(x + 1, y));
-            cell.AdjacentTiles.Add(ReturnHex(x, y + 1));
-            cell.AdjacentTiles.Add(ReturnHex(x - 1, y + 1));
-        }
-        else
-        {
-            cell.AdjacentTiles.Add(ReturnHex(x, y - 1));
-            cell.AdjacentTiles.Add(ReturnHex(x + 1, y - 1));
-            cell.AdjacentTiles.Add(ReturnHex(x + 1, y));
-            cell.AdjacentTiles.Add(ReturnHex(x - 1, y));
-            cell.AdjacentTiles.Add(ReturnHex(x - 1, y + 1));
-            cell.AdjacentTiles.Add(ReturnHex(x, y + 1));
-        }
     }
 
     public HexCell ReturnHex(int x, int y)

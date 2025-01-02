@@ -100,19 +100,15 @@ public class EnemyUnitManagement : MonoBehaviour
     }
     public Composition GetNewComposition(List<Unit> group)
     {
-        int scoutCount = 0;
-        int knightCount = 0;
-        int archerCount = 0;
-
         Composition composition = GroupToComposition(group);
 
         const float archerToKnightRatio = 2.5f;
         const float knightMultiplier = 1.5f;
         const float scoutMultiplier = 1.5f;
 
-        archerCount = Mathf.FloorToInt(composition.Knights / archerToKnightRatio);
-        knightCount = Mathf.FloorToInt(composition.Knights * knightMultiplier);
-        scoutCount = Mathf.FloorToInt(composition.Archers * scoutMultiplier);
+        int archerCount = Mathf.FloorToInt(composition.Knights / archerToKnightRatio);
+        int knightCount = Mathf.FloorToInt(composition.Knights * knightMultiplier);
+        int scoutCount = Mathf.FloorToInt(composition.Archers * scoutMultiplier);
 
         if (composition.Scouts >= 2)
         {
@@ -124,8 +120,10 @@ public class EnemyUnitManagement : MonoBehaviour
         }
         return new Composition(scoutCount, knightCount, archerCount);
     }
-    public Composition GetMissingComposition(Composition curr, Composition total)
+    public Composition GetMissingComposition(List<Unit> currentComposition, List<Unit> totalComposition)
     {
+        Composition total = GroupToComposition(totalComposition);
+        Composition curr = GroupToComposition(currentComposition);
         return new Composition(total.Scouts - curr.Scouts, total.Knights - curr.Knights, total.Archers - curr.Archers);
     }
 }
