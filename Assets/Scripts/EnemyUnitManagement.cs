@@ -2,9 +2,19 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UIElements;
+
+public class Composition
+{
+    // Composition is army composition, consists of 3 integers representing the number of each unit type.
+    public int Scouts;
+    public int Knights;
+    public int Archers;
+    public Composition(int scouts, int knights, int archers)
+    {
+        Scouts = scouts; Knights = knights; Archers = archers;
+    }
+}
 
 public class EnemyUnitManagement : MonoBehaviour
 {
@@ -27,8 +37,10 @@ public class EnemyUnitManagement : MonoBehaviour
         float leftBound = -7f * HexData.InnerRadius;
         float rightBound = 7f * HexData.InnerRadius;
 
-        foreach (Unit unit in team == "Player" ? Manager.PlayerUnits: Manager.EnemyUnits)
+        foreach (Unit unit in team == "Player" ? Manager.PlayerUnits : Manager.EnemyUnits)
         {
+            // if () continue; // if ResourceGroup?
+
             // Horizontal Zones (Left, Middle, Right)
             string zone = unit.transform.position.x < leftBound ? "Left" :
                                     unit.transform.position.x > rightBound ? "Right" : "Middle";
@@ -39,7 +51,7 @@ public class EnemyUnitManagement : MonoBehaviour
         return zoneDistribution;
     }
 
-    private (string State, float Score) EvaluateZone(string zone)
+    public (string State, float Score) EvaluateZone(string zone)
     {
         // Zone must be one of: "Left", "Middle", "Right"
         List<Unit> playerZoneUnits = GetUnitDistribution("Player")[zone];
@@ -52,7 +64,7 @@ public class EnemyUnitManagement : MonoBehaviour
             float y = u.transform.position.y;
             if (y > 6 * HexData.InnerRadius)
             {
-                return ("DEF", 100f); // change to more creative name; DEF-B currently means enemy incursion.
+                return ("DEFEND", 100f); // change to more creative name - currently representing enemy incursion
             }
             averageY += y;
         }
@@ -63,43 +75,57 @@ public class EnemyUnitManagement : MonoBehaviour
         return ("NORMAL", playerZoneUnits.Count);
     }
 
-    private int[] GetNewComposition(List<Unit> group)
+    public Composition GroupToComposition(List<Unit> group)
     {
-        int[] unitValues = new int[] { 0, 0, 0 };
-        int[] composition = new int[3];
-        //0 is scout, 1 is knight, 2 is archer
-        //knight>scout, archer>knight, scout>archer
-        Debug.Log(group.Count);
-        foreach (Unit u in group)
+        int scoutCount = 0;
+        int knightCount = 0;
+        int archerCount = 0;
+
+        foreach (Unit unit in group)
         {
-            switch (u.Type)
+            switch (unit.Type)
             {
                 case "Archer":
-                    unitValues[2]++;
+                    archerCount++;
                     break;
                 case "Knight":
-                    unitValues[1]++;
+                    knightCount++;
                     break;
                 case "Scout":
-                    unitValues[0]++;
+                    scoutCount++;
                     break;
             }
         }
-        composition[2] += Mathf.FloorToInt(unitValues[1] / 2.5f);
-        //an archer for every floor(2x/5) knights
-        composition[1] += Mathf.FloorToInt(unitValues[1] * 1.5f);
-        composition[0] += Mathf.FloorToInt(unitValues[0] * 1.5f);
-        //maybe economic consideration to comp[1]
-        if (unitValues[2] >= 2)
+        return new Composition(scoutCount, knightCount, archerCount);
+    }
+    public Composition GetNewComposition(List<Unit> group)
+    {
+        int scoutCount = 0;
+        int knightCount = 0;
+        int archerCount = 0;
+
+        Composition composition = GroupToComposition(group);
+
+        const float archerToKnightRatio = 2.5f;
+        const float knightMultiplier = 1.5f;
+        const float scoutMultiplier = 1.5f;
+
+        archerCount = Mathf.FloorToInt(composition.Knights / archerToKnightRatio);
+        knightCount = Mathf.FloorToInt(composition.Knights * knightMultiplier);
+        scoutCount = Mathf.FloorToInt(composition.Archers * scoutMultiplier);
+
+        if (composition.Scouts >= 2)
         {
-            //maybe add economic consideration here up above^^
-            composition[1] += Mathf.FloorToInt(unitValues[2] * 1.5f);
+            knightCount += Mathf.FloorToInt(composition.Scouts * knightMultiplier);
         }
-        else composition[0] += Mathf.RoundToInt(unitValues[2] * 1.5f);
-        foreach (int i in composition)
+        else
         {
-            Debug.Log(i);
+            scoutCount += composition.Scouts;
         }
-        return composition;
+        return new Composition(scoutCount, knightCount, archerCount);
+    }
+    public Composition GetMissingComposition(Composition curr, Composition total)
+    {
+        return new Composition(total.Scouts - curr.Scouts, total.Knights - curr.Knights, total.Archers - curr.Archers);
     }
 }

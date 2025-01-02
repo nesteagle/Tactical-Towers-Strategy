@@ -20,11 +20,18 @@ public class EnemyBrain : MonoBehaviour
     private Dictionary<Village,Unit> _villages = new();
 
     //maybe predefine at start and then start Think();
-    // Update is called once per frame
+    
+    private Dictionary<string, List<Unit>> playerZoneUnits = new();
+    private Dictionary<string, List<Unit>> enemyZoneUnits = new();
+
     private IEnumerator Think()
     {
-        yield return new WaitForEndOfFrame();
+        yield return new WaitForFixedUpdate();
         Expand();
+
+        playerZoneUnits = UnitManagement.GetUnitDistribution("Player");
+        enemyZoneUnits = UnitManagement.GetUnitDistribution("Enemy");
+
         //CalculateEconomyWeight();
         //CalculateMilitaryWeight();
 
@@ -109,6 +116,34 @@ public class EnemyBrain : MonoBehaviour
 
     private void BuildArmy()
     {
+        if (Manager.PlayerUnits.Count == 0) // Attack threshold
+        {
+            if (Manager.EnemyCoins > 0) // and rateofgrowth > ? !!!
+            {
+                Unit newAttacker = Game.EnemySpawn.PlaceTroop("Knight"); // !!!
+            }
+        }
+
+        if (Manager.PlayerUnits.Count > Manager.EnemyUnits.Count - ResourceGroup.Count)
+        {
+
+            if (playerZoneUnits["Middle"].Count / enemyZoneUnits["Middle"].Count > 1.5f)
+            {
+                // get missing composition units and train.
+            }
+            else if (playerZoneUnits["Left"].Count / enemyZoneUnits["Left"].Count > 1.5f)
+            {
+                // get missing composition units and train.
+            }
+            else if (playerZoneUnits["Right"].Count / enemyZoneUnits["Right"].Count > 1.5f)
+            {
+                // check resources for threshold
+                // get missing composition units and train.
+            }
+        }
+        // WEIGH MOST IMPORTANT SECTIONS and defend 2/3 of them.
+
+
         // other use of resources - build army to attack player or defend.
         // PURPOSE: create group to counter player group or attack.
 
@@ -129,19 +164,4 @@ public class EnemyBrain : MonoBehaviour
         // Group has State "Attack" "Defend"
         // Group has HexCell Target - target position
     }
-
-    private void CalculateEconomyWeight()
-    {
-        _economyWeight = Mathf.Abs((Manager.PlayerVillages.Count - Manager.EnemyVillages.Count) * 15);
-    }
-    private void CalculateMilitaryWeight()
-    {
-        float score = 0;
-        foreach (float f in UnitManagement.GetScores())
-        {
-            score += f;
-        }
-        _militaryWeight = Mathf.RoundToInt(score * 1.3f);
-    }
-
 }
