@@ -29,7 +29,7 @@ public class Game : MonoBehaviour
         }
     }
 
-    public EnemyBrain EnemyBrain;
+    public static EnemyBrain EnemyBrain;
     public static Spawn PlayerSpawn;
     public static Spawn EnemySpawn;
     public static HexMap Map;
@@ -42,6 +42,7 @@ public class Game : MonoBehaviour
     {
         yield return new WaitUntil(() => GameObject.Find("HexGrid").GetComponent<HexMap>() != null);
         Map = GameObject.Find("HexGrid").GetComponent<HexMap>();
+        EnemyBrain = GetComponent<EnemyBrain>();
         yield return StartCoroutine(Map.GenerateGrid(0, 0));
         yield return StartCoroutine(Map.GenerateMap());
         PlayerSpawn = PlayerSpawnCell.GetComponentInChildren<Spawn>();

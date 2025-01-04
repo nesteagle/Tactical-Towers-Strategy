@@ -1,8 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class EnemyBrain : MonoBehaviour
 {
@@ -22,8 +24,11 @@ public class EnemyBrain : MonoBehaviour
 
     //maybe predefine at start and then start Think();
 
-    private Dictionary<string, List<Unit>> playerZoneUnits = new();
-    private Dictionary<string, List<Unit>> enemyZoneUnits = new();
+    private Dictionary<string, List<Unit>> _playerZoneUnits = new();
+    private Dictionary<string, List<Unit>> _enemyZoneUnits = new();
+
+    private Dictionary<Unit, Unit> _unitAndTargets = new();
+    // Key is unit, Value is target unit.
 
     private string _defensePriority = null;
     private Queue<string> _unitQueue = new();
@@ -34,8 +39,8 @@ public class EnemyBrain : MonoBehaviour
         yield return new WaitForFixedUpdate();
         Expand();
 
-        playerZoneUnits = GetUnitDistribution("Player");
-        enemyZoneUnits = GetUnitDistribution("Enemy");
+        _playerZoneUnits = GetUnitDistribution("Player");
+        _enemyZoneUnits = GetUnitDistribution("Enemy");
 
         //CalculateEconomyWeight();
         //CalculateMilitaryWeight();
@@ -122,8 +127,8 @@ public class EnemyBrain : MonoBehaviour
 
     private void BuildArmy()
     {
-        playerZoneUnits = GetUnitDistribution("Player");
-        enemyZoneUnits = GetUnitDistribution("Enemy");
+        _playerZoneUnits = GetUnitDistribution("Player");
+        _enemyZoneUnits = GetUnitDistribution("Enemy");
 
         if (Manager.PlayerUnits.Count == 0) // Attack threshold
         {
@@ -136,16 +141,16 @@ public class EnemyBrain : MonoBehaviour
         }
         if (Manager.PlayerUnits.Count > Manager.EnemyUnits.Count-ResourceGroup.Count)
         {
-            int midCount = enemyZoneUnits["Middle"].Count;
-            int plrMidCount = playerZoneUnits["Middle"].Count;
+            int midCount = _enemyZoneUnits["Middle"].Count;
+            int plrMidCount = _playerZoneUnits["Middle"].Count;
             int midDiff = plrMidCount - midCount;
 
-            int leftCount = enemyZoneUnits["Left"].Count;
-            int plrLeftCount = playerZoneUnits["Left"].Count;
+            int leftCount = _enemyZoneUnits["Left"].Count;
+            int plrLeftCount = _playerZoneUnits["Left"].Count;
             int leftDiff = plrLeftCount - leftCount;
 
-            int rightCount = enemyZoneUnits["Right"].Count;
-            int plrRightCount = playerZoneUnits["Right"].Count;
+            int rightCount = _enemyZoneUnits["Right"].Count;
+            int plrRightCount = _playerZoneUnits["Right"].Count;
             int rightDiff = plrRightCount - rightCount;
 
             switch (_defensePriority)
@@ -163,7 +168,7 @@ public class EnemyBrain : MonoBehaviour
                     }
                     else if (2 * plrLeftCount > 3 * leftCount)
                     {
-                        Composition missing = UnitManagement.GetMissingComposition(enemyZoneUnits["Left"], playerZoneUnits["Left"]);
+                        Composition missing = UnitManagement.GetMissingComposition(_enemyZoneUnits["Left"], _playerZoneUnits["Left"]);
                         _unitQueue = UnitManagement.CompositionToUnitQueue(missing);
                     }
                     break;
@@ -176,7 +181,7 @@ public class EnemyBrain : MonoBehaviour
                     }
                     else if (2 * plrRightCount > 3 * rightCount)
                     {
-                        Composition missing = UnitManagement.GetMissingComposition(enemyZoneUnits["Right"], playerZoneUnits["Right"]);
+                        Composition missing = UnitManagement.GetMissingComposition(_enemyZoneUnits["Right"], _playerZoneUnits["Right"]);
                         _unitQueue = UnitManagement.CompositionToUnitQueue(missing);
                     }
                     break;
@@ -189,7 +194,7 @@ public class EnemyBrain : MonoBehaviour
                     }
                     else if (2 * plrMidCount > 3 * midCount)
                     {
-                        Composition missing = UnitManagement.GetMissingComposition(enemyZoneUnits["Middle"], playerZoneUnits["Middle"]);
+                        Composition missing = UnitManagement.GetMissingComposition(_enemyZoneUnits["Middle"], _playerZoneUnits["Middle"]);
                         _unitQueue = UnitManagement.CompositionToUnitQueue(missing);
                     }
                     break;
@@ -200,7 +205,10 @@ public class EnemyBrain : MonoBehaviour
             {
                 Debug.Log(_unitQueue.Peek());
                 Unit unit = Game.EnemySpawn.PlaceTroop(_unitQueue.Peek());
-                StartCoroutine(MoveWhenSpawned(unit)); // MoveUnitOffZone
+                StartCoroutine(MoveWhenSpawned(unit));
+
+                // assign target?
+
                 _unitQueue.Dequeue();
             }
         }
@@ -252,21 +260,26 @@ public class EnemyBrain : MonoBehaviour
     };
         // Directions are oriented to player view.
 
-        float leftBound = -7f * HexData.InnerRadius;
-        float rightBound = 7f * HexData.InnerRadius;
-
         foreach (Unit unit in team == "Player" ? Manager.PlayerUnits : Manager.EnemyUnits)
         {
             if (ResourceGroup.Contains(unit)) continue;
 
-            // Horizontal Zones (Left, Middle, Right)
-            string zone = unit.transform.position.x < leftBound ? "Left" :
-                                    unit.transform.position.x > rightBound ? "Right" : "Middle";
-            string zoneKey = zone;
+            string zoneKey = GetZone(unit.transform.position.x);
             zoneDistribution[zoneKey].Add(unit);
         }
 
         return zoneDistribution;
+    }
+
+    private string GetZone(float x)
+    {
+        float leftBound = -7f * HexData.InnerRadius;
+        float rightBound = 7f * HexData.InnerRadius;
+
+        // Horizontal Zones (Left, Middle, Right)
+        string zone = x < leftBound ? "Left" :
+                        x > rightBound ? "Right" : "Middle";
+        return zone;
     }
 
     public (string State, float Score) EvaluateZone(string zone)
@@ -291,5 +304,40 @@ public class EnemyBrain : MonoBehaviour
             return ("BUILDUP", playerZoneUnits.Count); // Player is building up troops in the back.
         }
         return ("NORMAL", playerZoneUnits.Count);
+    }
+    public string CalculatePlayerMovement(Unit unit, HexCell to) 
+    {
+        Vector3 deltaPos = to.Position - unit.transform.position;
+        string resultingZone = GetZone(to.Position.x);
+
+        // get closest unit in _enemyZoneUnits[resultingZone], and to.Position
+
+        string playerAction = "";
+        if (Math.Abs(deltaPos.y) > Math.Abs(deltaPos.x))
+        {
+            if (deltaPos.y > 0)
+            {
+                playerAction = "Advance";
+            }
+            else playerAction = "Retreat";
+        }
+        else playerAction = "Flank";
+        return playerAction;
+    }
+
+    private Unit GetClosestUnit(List<Unit> units, Vector3 position)
+    {
+        float maxDistance = int.MaxValue;
+        Unit closestUnit = null;
+        foreach (Unit u in units)
+        {
+            Vector3 dPos = u.transform.position - position;
+            if (dPos.magnitude < maxDistance)
+            {
+                maxDistance = dPos.magnitude;
+                closestUnit = u;
+            }
+        }
+        return closestUnit;
     }
 }
