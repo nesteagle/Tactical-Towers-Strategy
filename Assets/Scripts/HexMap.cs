@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UIElements;
 public static class HexData
 {
     public const float OuterRadius = 0.675f;
@@ -252,7 +253,13 @@ public class HexMap : MonoBehaviour
         // A debug measure: simple way to see which cell is which.
         cell.index = i;
     }
+    public (int x, int y) TransformToTilePosition(float x, float y)
+    {
+        int tileX = Mathf.RoundToInt(x / (2*HexData.InnerRadius) - y / 2);
+        int tileY = Mathf.RoundToInt(y / (1.5f * HexData.OuterRadius));
 
+        return (tileX, tileY);
+    }
     public HexCell ReturnHex(int x, int y)
     {
         if (_cellDictionary.TryGetValue((x, y), out HexCell cell))

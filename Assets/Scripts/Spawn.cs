@@ -118,7 +118,11 @@ public class Spawn : MonoBehaviour
                 toPlace.transform.position = new Vector3(pos.x, pos.y, 0);
                 _cell.Occupied = true;
                 toPlace.State = "Rest";
-                Debug.Log(toPlace.Team + toPlace.State);
+                if (toPlace.Team == "Player") Game.EnemyBrain.PlayerZoneUnits["Middle"].Add(toPlace);
+                else if (!Game.EnemyBrain.ResourceGroup.Contains(toPlace))
+                {
+                    Game.EnemyBrain.EnemyZoneUnits["Middle"].Add(toPlace); 
+                }
                 Actions.Dequeue();
             }
             yield return new WaitForFixedUpdate();
