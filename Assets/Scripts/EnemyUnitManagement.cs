@@ -3,94 +3,92 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-
-public class Composition
-{
-    // Composition is army composition, consists of 3 integers representing the number of each unit type.
-    public int Scouts;
-    public int Knights;
-    public int Archers;
-    public Composition(int scouts, int knights, int archers)
-    {
-        Scouts = scouts; Knights = knights; Archers = archers;
-    }
-}
+using UnityEngine.UIElements;
 
 public class EnemyUnitManagement : MonoBehaviour
 {
-    // Start is called before the first frame update
-    public Game Manager;
-    private List<Unit> _playerTroops = new();
-    private List<Vector2> _playerTroopPositions = new();
-    public GameObject TempRenderObject;
+    public EnemyBrain Brain;
 
-    public Composition GroupToComposition(List<Unit> group)
+    private Dictionary<Unit, Unit> _targetAndDefenders = new();
+    // Key is target unit, value is the unit that is defending it.
+    public void PlayerUnitMoved(Unit unit, HexCell to)
     {
-        int scoutCount = 0;
-        int knightCount = 0;
-        int archerCount = 0;
+        float deltaX = to.transform.position.x - unit.transform.position.x;
+        float deltaY = to.transform.position.y - unit.transform.position.y;
 
-        foreach (Unit unit in group)
+        // get closest unit in _enemyZoneUnits[resultingZone], and to.Position
+
+        if (deltaY >= 4.05)
         {
-            switch (unit.Type)
+            // player advance
+            Debug.Log("Advance");
+            MoveDefender(unit, to.transform.position);
+        }
+        else if (deltaY <= -4.05)
+        {
+            // player retreat
+            Debug.Log("Retreat");
+            MoveDefender(unit, to.transform.position);
+        }
+        else if (Math.Abs(deltaX) >= 6f * HexData.InnerRadius)
+        {
+            // player flanking manuever
+            Debug.Log("Flank");
+            MoveDefender(unit, to.transform.position);
+        }
+    }
+    private HexCell GetDestinationHex(Vector2 position)
+    {
+        (int x, int y) pos = Game.Map.TransformToTilePosition(position.x, position.y + 4.05f);
+        return Game.Map.ReturnHex(pos.x, pos.y);
+    }
+    private void MoveDefender(Unit target, Vector2 position)
+    {
+        if (_targetAndDefenders.ContainsKey(target))
+        {
+            _targetAndDefenders[target].MoveTo(GetDestinationHex(position));
+        }
+        else
+        {
+            Unit unit = MoveClosestTo(position);
+            if (unit != null)
             {
-                case "Archer":
-                    archerCount++;
-                    break;
-                case "Knight":
-                    knightCount++;
-                    break;
-                case "Scout":
-                    scoutCount++;
-                    break;
+                _targetAndDefenders.Add(target, unit);
             }
         }
-        return new Composition(scoutCount, knightCount, archerCount);
     }
-    public Composition GetNewComposition(List<Unit> group)
+    private Unit MoveClosestTo(Vector2 position)
     {
-        Composition composition = GroupToComposition(group);
-
-        const float archerToKnightRatio = 2.5f;
-        const float knightMultiplier = 1.5f;
-        const float scoutMultiplier = 1.5f;
-
-        int archerCount = Mathf.FloorToInt(composition.Knights / archerToKnightRatio);
-        int knightCount = Mathf.FloorToInt(composition.Knights * knightMultiplier);
-        int scoutCount = Mathf.FloorToInt(composition.Archers * scoutMultiplier);
-        knightCount += composition.Scouts;
-        //if (composition.Scouts >= 2)
-        //{
-        //    knightCount += Mathf.FloorToInt(composition.Scouts * knightMultiplier);
-        //}
-        //else
-        //{
-        //    scoutCount += composition.Scouts;
-        //}
-        return new Composition(scoutCount, knightCount, archerCount);
+        string resultingZone = Brain.GetZone(position.x);
+        Unit unit = null;
+        if (Brain.EnemyZoneUnits[resultingZone].Count > 0)
+        {
+            unit = GetClosestUnit(Brain.EnemyZoneUnits[resultingZone], position, 6);
+            unit.MoveTo(GetDestinationHex(position));
+            Debug.Log("moving!");
+        }
+        else if (Brain.EnemyZoneUnits["Middle"].Count > 0)
+        {
+            unit = GetClosestUnit(Brain.EnemyZoneUnits["Middle"], position, 6);
+            unit.MoveTo(GetDestinationHex(position));
+            Debug.Log("moving middle unit");
+        }
+        return unit;
     }
-    public Queue<string> CompositionToUnitQueue(Composition comp)
+    private Unit GetClosestUnit(List<Unit> units, Vector3 position, int range = 32)
     {
-        Queue<string> unitQueue = new();
-        for (int i = 0; i < comp.Knights; i++)
+        float maxDistance = range;
+        Unit closestUnit = null;
+        foreach (Unit u in units)
         {
-            unitQueue.Enqueue("Knight");
-        };
-        for (int i = 0; i < comp.Scouts; i++)
-        {
-            unitQueue.Enqueue("Scout");
-        };
-        for (int i = 0; i < comp.Archers; i++)
-        {
-            unitQueue.Enqueue("Archer");
-        };
-        return unitQueue;
-    }
-    public Composition GetMissingComposition(List<Unit> currentComposition, List<Unit> totalComposition)
-    {
-        Composition total = GetNewComposition(totalComposition);
-        Composition curr = GroupToComposition(currentComposition);
-        Debug.Log($"Total: {total.Scouts} scouts, {total.Knights} knights, {total.Archers} archers.");
-        return new Composition(total.Scouts - curr.Scouts, total.Knights - curr.Knights, total.Archers - curr.Archers);
+            if (_targetAndDefenders.ContainsValue(u)) continue;
+            Vector3 dPos = u.transform.position - position;
+            if (dPos.magnitude < maxDistance)
+            {
+                maxDistance = dPos.magnitude;
+                closestUnit = u;
+            }
+        }
+        return closestUnit;
     }
 }

@@ -55,7 +55,7 @@ public class SelectPath : MonoBehaviour
     {
         if (_targetCell == null || !_enabled) return;
         _unit.MoveTo(_targetCell);
-        Game.EnemyBrain.PlayerUnitMoved(_unit, _targetCell);
+        Game.EnemyBrain.UnitManagement.PlayerUnitMoved(_unit, _targetCell);
         StartCoroutine(ClearOnRest());
     }
     private void ClearPath(List<HexCell> path)
