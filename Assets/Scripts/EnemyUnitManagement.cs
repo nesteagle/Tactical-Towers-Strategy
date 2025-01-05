@@ -31,77 +31,27 @@ public class EnemyUnitManagement : MonoBehaviour
         float deltaY = to.transform.position.y - unit.transform.position.y;
 
         // get closest unit in _enemyZoneUnits[resultingZone], and to.Position
+        Vector2 position = to.transform.position;
 
-        MoveDefender(unit, to.transform.position);
+        //MoveDefender(unit, to.transform.position);
 
         //if (deltaY >= 4.05)
         //{
         //    // player advance
-        //    Debug.Log("Advance");
-        //    MoveDefender(unit, to.transform.position);
         //}
         //else if (deltaY <= -4.05)
         //{
         //    // player retreat
-        //    Debug.Log("Retreat");
-        //    MoveDefender(unit, to.transform.position);
         //}
         //else if (Math.Abs(deltaX) >= 6f * HexData.InnerRadius)
         //{
         //    // player flanking manuever
-        //    Debug.Log("Flank");
-        //    MoveDefender(unit, to.transform.position);
         //}
     }
-    private HexCell GetDestinationHex(Vector2 position)
+    private HexCell GetDestinationHex(float x, float y)
     {
-        (int x, int y) pos = Game.Map.TransformToTilePosition(position.x, position.y + 4.05f);
+        (int x, int y) pos = Game.Map.TransformToTilePosition(x, y);
         return Game.Map.ReturnHex(pos.x, pos.y);
-    }
-    private void MoveDefender(Unit target, Vector2 position)
-    {
-        if (TargetAndDefenders.ContainsKey(target))
-        {
-            foreach (Unit unit in TargetAndDefenders[target])
-            {
-                unit.MoveTo(GetDestinationHex(position));
-            }
-        }
-        else
-        {
-            Unit unit = GetAvailableEnemyUnit(Brain.EnemyZoneUnits[Brain.GetZone(position.x)], position, 32); // change if needed for defense !!!
-            if (unit == null) return;
-
-            Unit tryUnit = AssignTarget(unit, Manager.PlayerUnits);
-            if (tryUnit == null) return;
-
-            unit = tryUnit;
-            if (Vector2.Distance(unit.transform.position, target.transform.position) < 12)
-            {
-                unit.MoveTo(GetDestinationHex(target.transform.position));
-                // should then be dependent on matchup
-            }
-        }
-    }
-    private Unit MoveClosestTo(Vector2 position)
-    {
-        string resultingZone = Brain.GetZone(position.x);
-        Unit unit = null;
-        if (Brain.EnemyZoneUnits[resultingZone].Count > 0)
-        {
-            unit = GetAvailableEnemyUnit(Brain.EnemyZoneUnits[resultingZone], position, 6);
-            if (unit == null) return null;
-            unit.MoveTo(GetDestinationHex(position));
-            Debug.Log("moving!");
-        }
-        else if (Brain.EnemyZoneUnits["Middle"].Count > 0)
-        {
-            unit = GetAvailableEnemyUnit(Brain.EnemyZoneUnits["Middle"], position, 6);
-            if (unit == null) return null;
-            unit.MoveTo(GetDestinationHex(position));
-            Debug.Log("moving middle unit");
-        }
-        return unit;
     }
 
     private Unit GetClosestTarget(List<Unit> targets, Vector3 from, int range = 32)
@@ -157,32 +107,32 @@ public class EnemyUnitManagement : MonoBehaviour
     public void AssignAllTargets(HashSet<Unit> units)
     {
         List<Unit> toReassign = new();
+        //foreach (Unit u in units)
+        //{
+        //    if (Brain.ResourceGroup.Contains(u)) continue;
+        //    if (DefenderAndTargets.ContainsKey(u))
+        //    {
+        //        if (DefenderAndTargets[u].Type == _unitTargetRanking[u.Type][0]) continue;
+        //        else
+        //        {
+        //            DefenderAndTargets.Remove(u);
+        //            TargetAndDefenders[DefenderAndTargets[u]].Remove(u);
+        //            toReassign.Add(u);
+        //        }
+        //    }
+        //}
+        //foreach (Unit u in toReassign)
+        //{
+        //    AssignTarget(u, Manager.PlayerUnits);
+        //}
+        TargetAndDefenders.Clear();
+        DefenderAndTargets.Clear();
         foreach (Unit u in units)
         {
             if (Brain.ResourceGroup.Contains(u)) continue;
-            if (DefenderAndTargets.ContainsKey(u))
-            {
-                if (DefenderAndTargets[u].Type == _unitTargetRanking[u.Type][0]) continue;
-                else
-                {
-                    DefenderAndTargets.Remove(u);
-                    TargetAndDefenders[DefenderAndTargets[u]].Remove(u);
-                    toReassign.Add(u);
-                }
-            }
-        }
-        foreach (Unit u in toReassign)
-        {
             AssignTarget(u, Manager.PlayerUnits);
         }
-        //TargetAndDefenders = new();
-        //DefenderAndTargets = new();
-        //foreach(Unit u in units)
-        //{
-        //    if (Brain.ResourceGroup.Contains(u)) continue;
-        //    AssignTarget(u, Manager.PlayerUnits);
-        //}
-}
+    }
 
     public Unit AssignTarget(Unit toAssign, HashSet<Unit> targets)
     {

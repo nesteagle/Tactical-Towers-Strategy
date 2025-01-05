@@ -18,7 +18,7 @@ public class EnemyBrain : MonoBehaviour
     public HashSet<Unit> ResourceGroup = new();
     // ResourceGroup is list of scouts.
 
-    private Dictionary<Village, Unit> _villages = new();
+    public Dictionary<Village, Unit> VillageAndScout = new();
 
     //maybe predefine at start and then start Think();
 
@@ -81,8 +81,8 @@ public class EnemyBrain : MonoBehaviour
         foreach (Village v in villages)
         {
             if (v.Control <= -1f || v.Control > 0.9f) continue;
-            if (_villages.ContainsKey(v)) continue;
-            _villages.Add(v, unit);
+            if (VillageAndScout.ContainsKey(v)) continue;
+            VillageAndScout.Add(v, unit);
             unit.MoveTo(v.Cell);
             return;
         }
@@ -97,11 +97,11 @@ public class EnemyBrain : MonoBehaviour
         }
         foreach (Village v in Manager.TotalVillages)
         {
-            if (v.Control <= -1f) _villages.Remove(v);
+            if (v.Control <= -1f) VillageAndScout.Remove(v);
         }
         foreach (Unit scout in ResourceGroup)
         {
-            if (_villages.ContainsValue(scout)) continue;
+            if (VillageAndScout.ContainsValue(scout)) continue;
             Debug.Log(scout.State);
             if (scout.State == "Rest") ScoutVillage(scout);
         }
