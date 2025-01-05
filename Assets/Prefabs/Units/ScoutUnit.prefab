@@ -102,7 +102,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LocalHealth: 1
-  Speed: 3
+  Speed: 2.5
   AttackDamage: 1
   Cooldown: 0.8
   TilePosition: {x: 0, y: 0}

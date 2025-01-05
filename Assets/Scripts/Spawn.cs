@@ -121,7 +121,7 @@ public class Spawn : MonoBehaviour
                 if (toPlace.Team == "Player") Game.EnemyBrain.PlayerZoneUnits["Middle"].Add(toPlace);
                 else if (!Game.EnemyBrain.ResourceGroup.Contains(toPlace))
                 {
-                    Game.EnemyBrain.EnemyZoneUnits["Middle"].Add(toPlace); 
+                    Game.EnemyBrain.EnemyZoneUnits["Middle"].Add(toPlace);
                 }
                 Actions.Dequeue();
             }

@@ -5637,7 +5637,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -61869.88}
+  m_AnchoredPosition: {x: 0, y: -64028.156}
   m_SizeDelta: {x: 240, y: 250}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1067606902
@@ -6444,7 +6444,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 00a38d3d32e28c4449c1efb0ee392c95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PlayerCoins: 5
+  PlayerCoins: 25
   EnemyCoins: 25
   PlayerVillages: []
   EnemyVillages: []
@@ -6480,6 +6480,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Brain: {fileID: 1114821646}
+  Manager: {fileID: 1114821643}
 --- !u!114 &1114821646
 MonoBehaviour:
   m_ObjectHideFlags: 0

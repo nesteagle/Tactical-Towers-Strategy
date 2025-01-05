@@ -45,25 +45,6 @@ public class EnemyBrain : MonoBehaviour
 
         PlayerZoneUnits = GetUnitDistribution("Player");
         EnemyZoneUnits = GetUnitDistribution("Enemy");
-
-        //CalculateEconomyWeight();
-        //CalculateMilitaryWeight();
-
-        //Debug.Log("ECONOMYWEIGHT" + _economyWeight);
-        //Debug.Log("MILITARYWEIGHT" + _militaryWeight);
-
-        //int randomValue = Random.Range(1, _economyWeight + _militaryWeight + 1);
-        //Debug.Log(randomValue);
-        //if (randomValue <= _economyWeight)
-        //{
-        //    Expand();
-        //}
-        //else
-        //{
-        //    //Military
-        //    //train troops and set assign target groups using GetUnitGroups and GetNewComposition
-
-        //}
     }
 
     private void Update()
@@ -71,8 +52,9 @@ public class EnemyBrain : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             //Expand();
+
+            UnitManagement.AssignAllTargets(Manager.EnemyUnits);
             BuildArmy();
-            //StartCoroutine(Think());
         }
     }
 
@@ -86,6 +68,10 @@ public class EnemyBrain : MonoBehaviour
         else
         {
             EnemyZoneUnits[GetZone(unit.transform.position.x)].Remove(unit);
+        }
+        if (UnitManagement.TargetAndDefenders.ContainsKey(unit))
+        {
+            UnitManagement.TargetAndDefenders.Remove(unit);
         }
     }
 
@@ -177,25 +163,46 @@ public class EnemyBrain : MonoBehaviour
             if (_unitQueue.Count > 0)
             {
                 Unit unit = Game.EnemySpawn.PlaceTroop(_unitQueue.Peek());
-                StartCoroutine(MoveWhenSpawned(unit, _defensePriority));
                 _unitQueue.Dequeue();
+                Unit tryUnit = UnitManagement.AssignTarget(unit, Manager.PlayerUnits);
+                if (tryUnit != null) unit = tryUnit;
+                StartCoroutine(MoveWhenSpawned(unit, _defensePriority));
+
+                // ASSIGN TARGET !!!
             }
         }
     }
+
     private IEnumerator MoveWhenSpawned(Unit unit, string targetZone)
     {
+        Debug.Log("unit spawned");
         yield return new WaitUntil(() => unit.State == "Rest");
+        Debug.Log("unit moving");
         switch (targetZone)
         {
-            case "Middle":
-                unit.MoveTo(Game.Map.ReturnHex(-3, 6));
-                break;
             case "Left":
-                unit.MoveTo(Game.Map.ReturnHex(-7, 7));
+                unit.MoveTo(FindAvailableCell(unit, Game.Map.ReturnHex(0, 7), new List<HexCell>()));
                 break;
             case "Right":
-                unit.MoveTo(Game.Map.ReturnHex(0, 7));
+                unit.MoveTo(FindAvailableCell(unit, Game.Map.ReturnHex(0, 7), new List<HexCell>()));
                 break;
+            default:
+                unit.MoveTo(FindAvailableCell(unit, Game.Map.ReturnHex(-3, 6), new List<HexCell>()));
+                break;
+        }
+    }
+    private HexCell FindAvailableCell(Unit unit, HexCell cell, List<HexCell> visited) {
+        if (unit.CheckPath(cell) != null) return cell;
+        else
+        {
+            foreach (HexCell c in cell.AdjacentTiles)
+            {
+                if (visited.Contains(c) || c == null) continue;
+                visited.Add(c);
+                HexCell tryCell = FindAvailableCell(unit, c, visited);
+                if (tryCell != null) return tryCell;
+            }
+            return null;
         }
     }
     private void UpdateGroupPurpose()
