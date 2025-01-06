@@ -57,9 +57,17 @@ public class UnitMovement : MonoBehaviour
     }
     public void AnalyzeScoutMovement(Unit unit, Vector2 destination)
     {
-        if (UnitsAtPoint(destination, 4, "Player").Count >= 1)
+        HashSet<Unit> enemyUnits = UnitsAtPoint(destination, 2, "Enemy");
+        if (DistanceFromEnemySpawn(unit) < 2f)
         {
-            // player massing at point
+            // defend base
+        }
+        else if (enemyUnits.Count > 0)
+        {
+            // attacking enemy units.
+            // evaluate threat level with UnitsAtPoint(radius 4).Count to view reinforcements
+
+            IsAttackingArcher(unit, enemyUnits);
         }
         else
         {
@@ -78,39 +86,44 @@ public class UnitMovement : MonoBehaviour
             }
             else
             {
-                // scouting an arbitrary point
+                if (UnitsAtPoint(destination, 4, "Player").Count >= 1)
+                {
+                    // player massing at point
+                }
+                else
+                {
+                    // scouting an arbitrary point or flanking - send unit in x-direction of player unit movement.
+                }
             }
         }
-
     }
 
     public void AnalyzeKnightMovement(Unit unit, Vector2 destination)
     {
-        if (UnitsAtPoint(destination, 4, "Player").Count >= 1)
+        HashSet<Unit> enemyUnits = UnitsAtPoint(destination, 2, "Enemy");
+        if (DistanceFromEnemySpawn(unit) < 2f)
         {
-            // player massing at point
+            // defend base
+        }
+        else if (enemyUnits.Count > 0)
+        {
+            // attacking enemy units.
+            // evaluate threat level with UnitsAtPoint(radius 4).Count to view reinforcements
+
+            IsAttackingArcher(unit, enemyUnits);
         }
         else
         {
-            HashSet<Unit> units = UnitsAtPoint(destination, 2, "Enemy");
-            if (units.Count > 0)
+            if (UnitsAtPoint(destination, 4, "Player").Count >= 1)
             {
-                // attacking enemy units.
-                // evaluate threat level with UnitsAtPoint(radius 4).Count to view reinforcements
-
-                foreach (Unit u in units)
-                {
-                    if (u.Type == "Archer")
-                    {
-                        // archer under threat
-                    }
-                }
+                // player massing at point - build-up
             }
             else
             {
-                // evaluate if flanking manuever or build-up
+                // possible flank, send one unit in x-direction of player unit movement.
             }
         }
+
     }
     public void AnalyzeArcherMovement(Unit unit, Vector2 destination)
     {
@@ -120,22 +133,30 @@ public class UnitMovement : MonoBehaviour
         {
             if (units.Count > 0)
             {
-                // setting up to bombard, though WITH REINFORCEMENTS
+                // setting up to bombard, though player HAS REINFORCEMENTS
                 // consider priority way to counter.
-            } else
+            }
+            else
             {
                 // player massing at point
             }
         }
         else
         {
-            if (units.Count > 0)
+            if (DistanceFromEnemySpawn(unit) < 9f)
             {
-                // send scout quickly
+                // defend the base!
             }
             else
             {
-                // evaluate if flanking manuever or build-up
+                if (units.Count > 0)
+                {
+                    // send scout quickly
+                }
+                else
+                {
+                    // evaluate if flanking manuever or build-up
+                }
             }
         }
     }
@@ -155,6 +176,10 @@ public class UnitMovement : MonoBehaviour
         }
         return (v, distance);
     }
+    private float DistanceFromEnemySpawn(Unit unit)
+    {
+        return Vector2.Distance(unit.transform.position, Manager.EnemySpawnCell.transform.position);
+    }
     private HashSet<Unit> UnitsAtPoint(Vector2 position, float radius, string team)
     {
         HashSet<Unit> units = team == "Player" ? Manager.PlayerUnits : Manager.EnemyUnits;
@@ -168,5 +193,21 @@ public class UnitMovement : MonoBehaviour
             }
         }
         return unitsInRange;
+    }
+    private void IsAttackingArcher(Unit unit, HashSet<Unit> units)
+    {
+        foreach (Unit u in units)
+        {
+            if (u.Type == "Archer")
+            {
+                // begin retreating archer
+
+                HashSet<Unit> reinforcements = UnitsAtPoint(u.transform.position, 5, "Enemy");
+                foreach (Unit reinforcement in reinforcements)
+                {
+                    // assign target to attacking player unit and move immediately!
+                }
+            }
+        }
     }
 }
