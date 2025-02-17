@@ -112,7 +112,7 @@ public class HexMap : MonoBehaviour
             Debug.Log("Generated range");
         }
         GenerateSpawns(5, -10);
-        for (int i = 0; i < 3; i++) GenerateControl(Random.Range(1, _cellNumber / 3));
+        for (int i = 0; i < 2; i++) GenerateControl(Random.Range(1, _cellNumber / 3));
         yield break;
     }
     void GenerateTerrain(HexCell cell)

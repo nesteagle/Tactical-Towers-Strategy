@@ -23,25 +23,18 @@ public class EnemyBrain : MonoBehaviour
 
     //maybe predefine at start and then start Think();
 
-    public Dictionary<string, List<Unit>> PlayerZoneDistribution = new()
+    public Dictionary<int, List<Unit>> PlayerZoneDistribution = new()
     {
-        { "Left", new List<Unit>() },
-        { "Middle", new List<Unit>() },
-        { "Right", new List<Unit>() }
+        { 0, new List<Unit>() },
+        { 1, new List<Unit>() },
+        { 2, new List<Unit>() }
     };
-    public Dictionary<string, List<Unit>> EnemyZoneDistribution = new()
+    public Dictionary<int, List<Unit>> EnemyZoneDistribution = new()
     {
-        { "Left", new List<Unit>() },
-        { "Middle", new List<Unit>() },
-        { "Right", new List<Unit>() }
+        { 0, new List<Unit>() },
+        { 1, new List<Unit>() },
+        { 2, new List<Unit>() }
     };
-
-    private IEnumerator Think()
-    {
-        yield return new WaitForFixedUpdate();
-        Expand();
-        UpdateZoneDistributions();
-    }
 
     private void Update()
     {
@@ -76,19 +69,41 @@ public class EnemyBrain : MonoBehaviour
     private void ScoutVillage(Unit unit)
     {
         List<Village> villages = Manager.TotalVillages.OrderBy(v => Mathf.Abs(Vector2.Distance(v.transform.position, unit.transform.position))).ToList();
+        for (int i = 0; i < 2; i++) // nearby 2 villages.
+        {
+            if (Military.NetPowerScores[GetZone(villages[i].transform.position.x)] <= -1)
+            {
+                // ASK FOR REINFORCEMENTS.
+            }
+            if (VillageAndScout.ContainsKey(villages[i])) continue;
+            VillageAndScout.Add(villages[i], unit);
+            unit.MoveTo(villages[i].Cell);
+            return;
+        }
+
+        // THEN, evaluate remaining villages - accompany with troop push.
+
         foreach (Village v in villages)
         {
-            if (v.Control <= -1f || v.Control > 0.9f) continue;
-            if (VillageAndScout.ContainsKey(v)) continue;
-            VillageAndScout.Add(v, unit);
-            unit.MoveTo(v.Cell);
-            return;
+            int zoneScore = Military.NetPowerScores[GetZone(v.transform.position.x)];
+            if (zoneScore <= -1)
+            {
+                // ASK FOR REINFORCEMENTS.
+            } else if (zoneScore >= 2)
+            {
+                // PUSH with military in area
+                //if (v.Control <= -1f || v.Control > 0.9f) continue;
+                if (VillageAndScout.ContainsKey(v)) continue;
+                VillageAndScout.Add(v, unit);
+                unit.MoveTo(v.Cell);
+                return;
+            }
         }
     }
     private void Expand()
     {
         // If # of scouts < max, create one. Otherwise, send them to explore.
-        if (!Manager.EnemySpawnCell.Occupied && ResourceGroup.Count < 4)
+        if (!Manager.EnemySpawnCell.Occupied && ResourceGroup.Count < 3)
         {
             Unit newScout = Game.EnemySpawn.PlaceTroop("Scout");
             ResourceGroup.Add(newScout);
@@ -123,13 +138,13 @@ public class EnemyBrain : MonoBehaviour
         EnemyZoneDistribution = GetUnitDistribution("Enemy");
     }
 
-    public Dictionary<string, List<Unit>> GetUnitDistribution(string team)
+    public Dictionary<int, List<Unit>> GetUnitDistribution(string team)
     {
-        Dictionary<string, List<Unit>> zoneDistribution = new()
+        Dictionary<int, List<Unit>> zoneDistribution = new()
         {
-            { "Left", new List<Unit>() },
-            { "Middle", new List<Unit>() },
-            { "Right", new List<Unit>() }
+            { 0, new List<Unit>() },
+            { 1, new List<Unit>() },
+            { 2, new List<Unit>() }
         };
         // Directions are oriented to player view.
 
@@ -137,21 +152,20 @@ public class EnemyBrain : MonoBehaviour
         {
             if (ResourceGroup.Contains(unit)) continue;
 
-            string zoneKey = GetZone(unit.transform.position.x);
+            int zoneKey = GetZone(unit.transform.position.x);
             zoneDistribution[zoneKey].Add(unit);
         }
 
         return zoneDistribution;
     }
 
-    public string GetZone(float x)
+    public int GetZone(float x)
     {
         float leftBound = -7f * HexData.InnerRadius; //approx 4.1
         float rightBound = 7f * HexData.InnerRadius;
 
         // Horizontal Zones (Left, Middle, Right)
-        string zone = x < leftBound ? "Left" :
-                        x > rightBound ? "Right" : "Middle";
+        int zone = x < leftBound ? 0 : x > rightBound ? 1 : 2;
         return zone;
     }
 }

@@ -81,6 +81,33 @@ public class Game : MonoBehaviour
         }
         return Units;
     }
+
+    public static string IndexToZone(int index)
+    {
+        switch (index)
+        {
+            case 0:
+                return "Left";
+            case 1:
+                return "Middle";
+            default:
+                return "Right";
+        }
+    }
+
+    public static int ZoneToIndex(string name)
+    {
+
+        switch (name)
+        {
+            case "Left":
+                return 0;
+            case "Middle":
+                return 1;
+            default:
+                return 2;
+        }
+    }
 }
 //TO DO FEATURES:
 

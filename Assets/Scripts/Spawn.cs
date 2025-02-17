@@ -119,10 +119,10 @@ public class Spawn : MonoBehaviour
                 toPlace.transform.position = new Vector3(pos.x, pos.y, 0);
                 _cell.Occupied = true;
                 toPlace.State = "Rest";
-                if (toPlace.Team == "Player") Game.EnemyBrain.PlayerZoneDistribution["Middle"].Add(toPlace);
+                if (toPlace.Team == "Player") Game.EnemyBrain.PlayerZoneDistribution[1].Add(toPlace);
                 else if (!Game.EnemyBrain.ResourceGroup.Contains(toPlace))
                 {
-                    Game.EnemyBrain.EnemyZoneDistribution["Middle"].Add(toPlace);
+                    Game.EnemyBrain.EnemyZoneDistribution[1].Add(toPlace);
                 }
                 Actions.Dequeue();
             }
