@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,6 +7,7 @@ public class UnitMovement : MonoBehaviour
 {
     public Game Manager;
     public EnemyBrain Brain;
+
     private string GetMovementDirection(float deltaX, float deltaY)
     {
         string state;
@@ -24,38 +26,19 @@ public class UnitMovement : MonoBehaviour
         return state;
     }
 
-    private void AnalyzeMovement(Vector3 deltaPos)
+    private void AnalyzeMovement(Unit unit, Vector2 destination)
     {
-        string state = GetMovementDirection(deltaPos.x, deltaPos.z);
-        switch (state)
+        if (unit.Type == "Archer")
         {
-            case "NE":
-                Debug.Log("Moving NE");
-                break;
-            case "NW":
-                Debug.Log("Moving NW");
-                break;
-            case "SE":
-                Debug.Log("Moving SE");
-                break;
-            case "SW":
-                Debug.Log("Moving SW");
-                break;
-            case "EN":
-                Debug.Log("Moving EN");
-                break;
-            case "ES":
-                Debug.Log("Moving ES");
-                break;
-            case "WN":
-                Debug.Log("Moving WN");
-                break;
-            case "WS":
-                Debug.Log("Moving WS");
-                break;
+            AnalyzeRangedMovement(unit, destination);
+        }
+        else
+        {
+            AnalyzeMeleeMovement(unit, destination);
         }
     }
-    public void AnalyzeScoutMovement(Unit unit, Vector2 destination)
+
+    public void AnalyzeMeleeMovement(Unit unit, Vector2 destination)
     {
         HashSet<Unit> enemyUnits = UnitsAtPoint(destination, 2, "Enemy");
         if (DistanceFromEnemySpawn(unit) < 2f)
@@ -82,6 +65,7 @@ public class UnitMovement : MonoBehaviour
                 else
                 {
                     // evaluate importance of village
+                    // Evaluate village distance from enemy spawn and amount of troops to back.
                 }
             }
             else
@@ -92,40 +76,15 @@ public class UnitMovement : MonoBehaviour
                 }
                 else
                 {
+                    // Check for weakness or mistake move (view reinforcements and evaluate)
+                    // ELSE
                     // scouting an arbitrary point or flanking - send unit in x-direction of player unit movement.
                 }
             }
         }
     }
 
-    public void AnalyzeKnightMovement(Unit unit, Vector2 destination)
-    {
-        HashSet<Unit> enemyUnits = UnitsAtPoint(destination, 2, "Enemy");
-        if (DistanceFromEnemySpawn(unit) < 2f)
-        {
-            // defend base
-        }
-        else if (enemyUnits.Count > 0)
-        {
-            // attacking enemy units.
-            // evaluate threat level with UnitsAtPoint(radius 4).Count to view reinforcements
-
-            IsAttackingArcher(unit, enemyUnits);
-        }
-        else
-        {
-            if (UnitsAtPoint(destination, 4, "Player").Count >= 1)
-            {
-                // player massing at point - build-up
-            }
-            else
-            {
-                // possible flank, send one unit in x-direction of player unit movement.
-            }
-        }
-
-    }
-    public void AnalyzeArcherMovement(Unit unit, Vector2 destination)
+    public void AnalyzeRangedMovement(Unit unit, Vector2 destination)
     {
         HashSet<Unit> units = UnitsAtPoint(destination, 9f, "Enemy");
 
@@ -155,6 +114,7 @@ public class UnitMovement : MonoBehaviour
                 }
                 else
                 {
+                    // check for weakness.
                     // evaluate if flanking manuever or build-up
                 }
             }

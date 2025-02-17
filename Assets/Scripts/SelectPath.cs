@@ -37,7 +37,7 @@ public class SelectPath : MonoBehaviour
         _pathToClear = DrawPath(_unit.TilePosition, _targetCell.Position);
     }
 
-    private List<HexCell> DrawPath(Vector2Int start, Vector3Int finish)
+    private List<HexCell> DrawPath(Vector2Int start, Vector2Int finish)
     {
         HexMap map = Game.Map;
         List<HexCell> path = Pathfinding.FindPath(map.ReturnHex(start.x, start.y), map.ReturnHex(finish.x, finish.y));

@@ -21,13 +21,9 @@ public class Game : MonoBehaviour
 
     public HexCell PlayerSpawnCell;
     public HexCell EnemySpawnCell;
-    public Vector2Int EnemySpawnPos
-    {
-        get
-        {
-            return new Vector2Int(EnemySpawnCell.Position.x, EnemySpawnCell.Position.y);
-        }
-    }
+
+    public static float PLAYER_SPAWN_Y;
+    public static float ENEMY_SPAWN_Y;
 
     public static EnemyBrain EnemyBrain;
     public static Spawn PlayerSpawn;
@@ -47,6 +43,8 @@ public class Game : MonoBehaviour
         yield return StartCoroutine(Map.GenerateMap());
         PlayerSpawn = PlayerSpawnCell.GetComponentInChildren<Spawn>();
         EnemySpawn = EnemySpawnCell.GetComponentInChildren<Spawn>();
+        PLAYER_SPAWN_Y = PlayerSpawnCell.transform.position.y;
+        ENEMY_SPAWN_Y = EnemySpawnCell.transform.position.y;
     }
 
     public HashSet<Unit> RemoveUnit(Unit toRemove)

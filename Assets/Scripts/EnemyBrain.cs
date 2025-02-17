@@ -12,6 +12,7 @@ public class EnemyBrain : MonoBehaviour
     // Start is called before the first frame update
     public EnemyUnitManagement UnitManagement;
     public EnemyUnitPositioning UnitPositioning;
+    public EnemyMilitaryBrain Military;
     public UnitComposition Composition;
     public Game Manager;
 
@@ -22,29 +23,24 @@ public class EnemyBrain : MonoBehaviour
 
     //maybe predefine at start and then start Think();
 
-    public Dictionary<string, List<Unit>> PlayerZoneUnits = new()
+    public Dictionary<string, List<Unit>> PlayerZoneDistribution = new()
     {
         { "Left", new List<Unit>() },
         { "Middle", new List<Unit>() },
         { "Right", new List<Unit>() }
     };
-    public Dictionary<string, List<Unit>> EnemyZoneUnits = new()
+    public Dictionary<string, List<Unit>> EnemyZoneDistribution = new()
     {
         { "Left", new List<Unit>() },
         { "Middle", new List<Unit>() },
         { "Right", new List<Unit>() }
     };
-
-    private string _defensePriority = null;
-    private Queue<string> _unitQueue = new();
 
     private IEnumerator Think()
     {
         yield return new WaitForFixedUpdate();
         Expand();
-
-        PlayerZoneUnits = GetUnitDistribution("Player");
-        EnemyZoneUnits = GetUnitDistribution("Enemy");
+        UpdateZoneDistributions();
     }
 
     private void Update()
@@ -53,8 +49,10 @@ public class EnemyBrain : MonoBehaviour
         {
             //Expand();
 
-            UnitManagement.AssignAllTargets(Manager.EnemyUnits);
-            BuildArmy();
+            //UnitManagement.AssignAllTargets(Manager.EnemyUnits);
+            Expand();
+            UpdateZoneDistributions();
+            Military.Think();
         }
     }
 
@@ -67,7 +65,7 @@ public class EnemyBrain : MonoBehaviour
         }
         else
         {
-            EnemyZoneUnits[GetZone(unit.transform.position.x)].Remove(unit);
+            EnemyZoneDistribution[GetZone(unit.transform.position.x)].Remove(unit);
         }
         if (UnitManagement.TargetAndDefenders.ContainsKey(unit))
         {
@@ -90,7 +88,7 @@ public class EnemyBrain : MonoBehaviour
     private void Expand()
     {
         // If # of scouts < max, create one. Otherwise, send them to explore.
-        if (!Manager.EnemySpawnCell.Occupied && ResourceGroup.Count < 5)
+        if (!Manager.EnemySpawnCell.Occupied && ResourceGroup.Count < 4)
         {
             Unit newScout = Game.EnemySpawn.PlaceTroop("Scout");
             ResourceGroup.Add(newScout);
@@ -107,116 +105,24 @@ public class EnemyBrain : MonoBehaviour
         }
     }
 
-    private void BuildArmy()
+    public int GetEconomyScore()
     {
-        if (Manager.PlayerUnits.Count == 0 && Manager.EnemyCoins > 0)
-        {
-            Unit newAttacker = Game.EnemySpawn.PlaceTroop("Knight");
-        }
+        int score = 0;
+        score += (Manager.EnemyVillages.Count - Manager.PlayerVillages.Count) * 5;
 
-        if (Manager.PlayerUnits.Count > Manager.EnemyUnits.Count - ResourceGroup.Count)
-        {
-            int midDiff = PlayerZoneUnits["Middle"].Count - EnemyZoneUnits["Middle"].Count;
-            int leftDiff = PlayerZoneUnits["Left"].Count - EnemyZoneUnits["Left"].Count;
-            int rightDiff = PlayerZoneUnits["Right"].Count - EnemyZoneUnits["Right"].Count;
+        int moneyDifference = Manager.EnemyCoins - Manager.PlayerCoins;
 
-            switch (_defensePriority)
-            {
-                case null:
-                    _defensePriority = midDiff > leftDiff ? midDiff > rightDiff ? "Middle" : "Right" : leftDiff > rightDiff ? "Left" : "Right";
-                    break;
-                case "Left":
-                    if (leftDiff <= 0)
-                    {
-                        _defensePriority = rightDiff > midDiff ? "Right" : "Middle";
-                    }
-                    else if (2 * PlayerZoneUnits["Left"].Count > 3 * EnemyZoneUnits["Left"].Count)
-                    {
-                        Composition missing = Composition.GetMissingComposition(EnemyZoneUnits["Left"], PlayerZoneUnits["Left"]);
-                        _unitQueue = Composition.CompositionToUnitQueue(missing);
-                    }
-                    break;
-                case "Right":
-                    if (rightDiff <= 0)
-                    {
-                        _defensePriority = leftDiff > midDiff ? "Left" : "Middle";
-                    }
-                    else if (2 * PlayerZoneUnits["Right"].Count > 3 * EnemyZoneUnits["Right"].Count)
-                    {
-                        Composition missing = Composition.GetMissingComposition(EnemyZoneUnits["Right"], PlayerZoneUnits["Right"]);
-                        _unitQueue = Composition.CompositionToUnitQueue(missing);
-                    }
-                    break;
-                case "Middle":
-                    if (midDiff <= 0)
-                    {
-                        _defensePriority = leftDiff > rightDiff ? "Left" : "Right";
-                    }
-                    else if (2 * PlayerZoneUnits["Middle"].Count > 3 * EnemyZoneUnits["Middle"].Count)
-                    {
-                        Composition missing = Composition.GetMissingComposition(EnemyZoneUnits["Middle"], PlayerZoneUnits["Middle"]);
-                        _unitQueue = Composition.CompositionToUnitQueue(missing);
-                    }
-                    break;
-            }
+        score += moneyDifference / 3;
 
-            if (_unitQueue.Count > 0)
-            {
-                Unit unit = Game.EnemySpawn.PlaceTroop(_unitQueue.Peek());
-                _unitQueue.Dequeue();
-                Unit tryUnit = UnitManagement.AssignTarget(unit, Manager.PlayerUnits);
-                if (tryUnit != null) unit = tryUnit;
-                StartCoroutine(MoveWhenSpawned(unit, _defensePriority));
-
-                // ASSIGN TARGET !!!
-            }
-        }
+        return score;
     }
-
-    private IEnumerator MoveWhenSpawned(Unit unit, string targetZone)
+    
+    public void UpdateZoneDistributions()
     {
-        Debug.Log("unit spawned");
-        yield return new WaitUntil(() => unit.State == "Rest");
-        Debug.Log("unit moving");
-        switch (targetZone)
-        {
-            case "Left":
-                unit.MoveTo(FindAvailableCell(unit, Game.Map.ReturnHex(0, 7), new List<HexCell>()));
-                break;
-            case "Right":
-                unit.MoveTo(FindAvailableCell(unit, Game.Map.ReturnHex(0, 7), new List<HexCell>()));
-                break;
-            default:
-                unit.MoveTo(FindAvailableCell(unit, Game.Map.ReturnHex(-3, 6), new List<HexCell>()));
-                break;
-        }
+        PlayerZoneDistribution = GetUnitDistribution("Player");
+        EnemyZoneDistribution = GetUnitDistribution("Enemy");
     }
-    private HexCell FindAvailableCell(Unit unit, HexCell cell, List<HexCell> visited) {
-        if (unit.CheckPath(cell) != null) return cell;
-        else
-        {
-            foreach (HexCell c in cell.AdjacentTiles)
-            {
-                if (visited.Contains(c) || c == null) continue;
-                visited.Add(c);
-                HexCell tryCell = FindAvailableCell(unit, c, visited);
-                if (tryCell != null) return tryCell;
-            }
-            return null;
-        }
-    }
-    private void UpdateGroupPurpose()
-    {
-        // several cases:
-        // evaluate player strength and decide to attack or defend.
-        // evaluate player position and decide next movement.
-        // special cases: 
-        // player near control point
-        // player massing troops in back
 
-        // Group has State "Attack" "Defend"
-        // Group has HexCell Target - target position
-    }
     public Dictionary<string, List<Unit>> GetUnitDistribution(string team)
     {
         Dictionary<string, List<Unit>> zoneDistribution = new()
@@ -247,29 +153,5 @@ public class EnemyBrain : MonoBehaviour
         string zone = x < leftBound ? "Left" :
                         x > rightBound ? "Right" : "Middle";
         return zone;
-    }
-
-    public (string State, float Score) EvaluateZone(string zone)
-    {
-        // Zone must be one of: "Left", "Middle", "Right"
-        List<Unit> playerZoneUnits = GetUnitDistribution("Player")[zone];
-        List<Unit> enemyZoneUnits = GetUnitDistribution("Enemy")[zone];
-
-        float averageY = 0f;
-        if (playerZoneUnits.Count == 0 || enemyZoneUnits.Count / playerZoneUnits.Count > 3) return ("ATTACK", 5f); // adjust weight system?
-        foreach (Unit u in playerZoneUnits)
-        {
-            float y = u.transform.position.y;
-            if (y > 6 * HexData.InnerRadius)
-            {
-                return ("DEFEND", 100f); // change to more creative name - currently representing enemy incursion
-            }
-            averageY += y;
-        }
-        if (averageY / playerZoneUnits.Count <= -12 * HexData.InnerRadius) // CONSTANT !!!
-        {
-            return ("BUILDUP", playerZoneUnits.Count); // Player is building up troops in the back.
-        }
-        return ("NORMAL", playerZoneUnits.Count);
     }
 }

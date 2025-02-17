@@ -14,7 +14,7 @@ public class Pathfinding : MonoBehaviour
         HexCell currentTile = startPoint;
 
         currentTile.G = 0;
-        currentTile.H = GetEstimatedPathCost(startPoint.Position, endPoint.Position);
+        currentTile.H = GetEstimatedPathCost(AxialToCubic(startPoint.Position), AxialToCubic(endPoint.Position));
         openPathTiles.Add(currentTile);
 
         while (openPathTiles.Count != 0)
@@ -48,7 +48,7 @@ public class Pathfinding : MonoBehaviour
                 if (!(openPathTiles.Contains(adjacentTile)))
                 {
                     adjacentTile.G = g;
-                    adjacentTile.H = GetEstimatedPathCost(adjacentTile.Position, endPoint.Position);
+                    adjacentTile.H = GetEstimatedPathCost(AxialToCubic(adjacentTile.Position), AxialToCubic(endPoint.Position));
                     openPathTiles.Add(adjacentTile);
                 }
                 else if (adjacentTile.G > g)
@@ -101,5 +101,10 @@ public class Pathfinding : MonoBehaviour
         //return Mathf.Max(Mathf.Abs(startPosition.x - targetPosition.x), Mathf.Max(Mathf.Abs(startPosition.y - targetPosition.y)));
         //, Mathf.Abs(startPosition.z - targetPosition.z)));
 
+    }
+
+    public static Vector3Int AxialToCubic(Vector2Int axial)
+    {
+        return new Vector3Int(axial.x, axial.y, - axial.x - axial.y);
     }
 }

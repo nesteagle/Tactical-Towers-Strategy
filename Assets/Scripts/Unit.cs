@@ -33,8 +33,11 @@ public class Unit : MonoBehaviour
     public Vector2Int TilePosition;
     // Position is the current tile position of the unit.
 
+    public HexCell CurrentTile;
+    // CurrentTile is the current tile object the unit is on.
+
     public string State = "Rest";
-    // State is one of "Rest" "Attacking" "Moving"; current status of unit.
+    // State is one of "Rest" "Attacking" "Moving" "Training"; current status of unit.
 
     public string Type;
     // Type is one of "Scout" "Knight" "Archer"; unit type.
@@ -77,7 +80,8 @@ public class Unit : MonoBehaviour
             State = "Moving";
 
             yield return StartCoroutine(MovePosition(transform.localPosition, path[1].transform.localPosition, Speed));
-            TilePosition = new Vector2Int(path[1].Position.x, path[1].Position.y);
+            TilePosition = path[1].Position;
+            CurrentTile = path[1];
             path[0].ResetColor();
             path[1].ResetColor();
             path[0].Occupied = false;

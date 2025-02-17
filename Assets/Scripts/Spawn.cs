@@ -113,15 +113,16 @@ public class Spawn : MonoBehaviour
                 ;
                 //play animation[CheckUnit(Actions.Peek().Split(" ")[0])];
                 //play animation (when made)
-                toPlace.TilePosition = new Vector2Int(_cell.Position.x, _cell.Position.y);
+                toPlace.TilePosition = _cell.Position;
+                toPlace.CurrentTile = _cell;
                 Vector3 pos = _cell.transform.position;
                 toPlace.transform.position = new Vector3(pos.x, pos.y, 0);
                 _cell.Occupied = true;
                 toPlace.State = "Rest";
-                if (toPlace.Team == "Player") Game.EnemyBrain.PlayerZoneUnits["Middle"].Add(toPlace);
+                if (toPlace.Team == "Player") Game.EnemyBrain.PlayerZoneDistribution["Middle"].Add(toPlace);
                 else if (!Game.EnemyBrain.ResourceGroup.Contains(toPlace))
                 {
-                    Game.EnemyBrain.EnemyZoneUnits["Middle"].Add(toPlace);
+                    Game.EnemyBrain.EnemyZoneDistribution["Middle"].Add(toPlace);
                 }
                 Actions.Dequeue();
             }
@@ -155,7 +156,7 @@ public class Spawn : MonoBehaviour
         if (IsPlayerSpawn) unit.Team = "Player";
         else unit.Team = "Enemy";
 
-        unit.State = "Moving";
+        unit.State = "Training";
         unit.transform.position = new Vector3(0, -100);
 
         _manager.AddUnit(unit);

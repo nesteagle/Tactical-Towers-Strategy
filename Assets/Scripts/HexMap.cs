@@ -243,7 +243,7 @@ public class HexMap : MonoBehaviour
         // Unity function to create Game object.
         HexCell cell = Cells[i] = cellObj.GetComponent<HexCell>();
         //We need to access the instantiated object's class properties.
-        cell.Position = new Vector3Int(x, y, -x - y);
+        cell.Position = new Vector2Int(x, y); // Vector3Int(x, y, -x - y);
         _cellDictionary[(cell.Position.x, cell.Position.y)] = cell;
         // Assign cell to dictionary.
         cell.transform.SetParent(transform, false);

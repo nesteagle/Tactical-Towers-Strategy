@@ -45,7 +45,7 @@ public class HexCell : MonoBehaviour
             ResetColor();
         }
     }
-    public Vector3Int Position; // Z = -x -y
+    public Vector2Int Position; // Z = -x -y
     public List<HexCell> AdjacentTiles = new();
     public bool Obstructed = false;
     // Obstructed is boolean based on terrain type.

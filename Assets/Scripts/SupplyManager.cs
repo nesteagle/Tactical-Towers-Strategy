@@ -20,7 +20,8 @@ public class SupplyManager : MonoBehaviour
         unitObject = Instantiate(SupplyPrefab);
         Unit unit = unitObject.GetComponent<Unit>();
         unit.Type = "Supply";
-        unit.TilePosition = new Vector2Int(baseCell.Position.x, baseCell.Position.y);
+        unit.TilePosition = baseCell.Position;
+        unit.CurrentTile = baseCell;
         Vector3 pos = baseCell.transform.position;
         unit.transform.position = new Vector3(pos.x, pos.y, 0);
         if (onPlayerTeam) unit.Team = "Player";
